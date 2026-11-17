@@ -1,7 +1,7 @@
 brand:
-  name: PREVISÃO RJ
-  handle: '@previsaorj'
-  promise: O tempo do Rio para decidir seu dia.
+  name: PREVISÃO PR
+  handle: '@previsaopr'
+  promise: O tempo do Paraná para decidir seu dia.
   timezone: America/Sao_Paulo
   colors:
     ink: '#0B1F33'

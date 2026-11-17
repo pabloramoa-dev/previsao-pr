@@ -1,13 +1,58 @@
-# Identificadores de OUTROS canais que nao podem aparecer neste repositorio
-# (src, config, scripts, workflows, estudio). Verificado por
-# scripts/isolation_guard.py no CI. Num repositorio de estado, esta lista e
-# escrita por scripts/novo_estado.py com todos os canais da rede menos este.
-#
-# O modelo carrega o estado de referencia (config/estado.yaml); aqui ficam os
-# identificadores do pipeline anterior que deu origem ao motor.
+# Outros canais da rede: nao podem aparecer neste repositorio.
 proibidos:
-  - "@previsaosulflu"
-  - previsaovr
-  - "27148485038175"
-  - previsao-sul-fluminense
-  - reels/previsao_lib
+- '27148485038175'
+- '@previsaosulflu'
+- otemposp
+- previsao-ac
+- previsao-al
+- previsao-am
+- previsao-ap
+- previsao-ba
+- previsao-bsb
+- previsao-ce
+- previsao-es
+- previsao-go
+- previsao-ma
+- previsao-mg
+- previsao-ms
+- previsao-mt
+- previsao-pa
+- previsao-pb
+- previsao-pe
+- previsao-pi
+- previsao-rj
+- previsao-rn
+- previsao-ro
+- previsao-rr
+- previsao-rs
+- previsao-sc
+- previsao-se
+- previsao-sul-fluminense
+- previsao-to
+- previsaoac
+- previsaoal
+- previsaoam
+- previsaoap
+- previsaoba
+- previsaobsb
+- previsaoce
+- previsaoes
+- previsaogo
+- previsaoma
+- previsaomg
+- previsaoms
+- previsaomt
+- previsaopa
+- previsaopb
+- previsaope
+- previsaopi
+- previsaorj
+- previsaorn
+- previsaoro
+- previsaorr
+- previsaors
+- previsaosc
+- previsaose
+- previsaoto
+- previsaovr
+- reels/previsao_lib

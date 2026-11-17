@@ -1,43 +1,42 @@
-# previsao-modelo
+# Previsão PR — @previsaopr
 
-Modelo dos canais de previsão do tempo por estado. É o motor do @previsaorj
-(Bira às 6h com a previsão de hoje, Bia às 18h com a de amanhã, vozes Kokoro,
-estúdio HyperFrames, publicação automática no Instagram), com tudo que é próprio
-de um canal tirado do código e posto em dois arquivos:
+Reels automáticos de previsão do tempo no Paraná: **Bira do Tempo** às
+06:00 com a previsão de hoje e **Bia da Orla** às 18:00 com a de
+amanhã (hora local, UTC-3; 06:00 e 18:00 em Brasília).
 
-- `config/estado.yaml` — nome, @, fuso, títulos, hashtags, cenário e as seis
-  regiões do quadro;
-- `config/locais.yaml` — municípios e pontos de coleta.
+Gerado de `pabloramoa-dev/previsao-modelo` por `scripts/novo_estado.py`. Motor, personagens,
+vozes e testes são os do modelo; o que é deste canal está em `config/estado.yaml` e
+`config/locais.yaml`. Correção no motor se faz no modelo e se propaga.
 
-Este repositório não publica nada: serve de origem para os repositórios dos estados.
-A configuração dele é a do estado de referência, e os testes rodam sobre ela.
+Dados: [MET Norway](https://api.met.no) (licença CC BY 4.0, crédito em toda legenda).
 
-## Gerar um estado
+## Quadro das seis regiões
 
-```bash
-pip install -r requirements/test.txt
-python -m scripts.novo_estado PR --destino ../previsao-pr
-cd ../previsao-pr && python -m pytest -q
-```
+| Região | Âncora (todo Reel) | Reservas |
+| --- | --- | --- |
+| Curitiba | Curitiba | São José dos Pinhais, Colombo |
+| Litoral | Paranaguá | Matinhos, Guaratuba |
+| Campos Gerais | Ponta Grossa | Castro, Telêmaco Borba |
+| Norte | Londrina | Apucarana, Cornélio Procópio |
+| Noroeste | Maringá | Umuarama, Paranavaí |
+| Oeste | Cascavel | Foz do Iguaçu, Toledo |
 
-As regiões e cidades de cada estado ficam em `scripts/rede/estados.yaml`; as
-coordenadas e o fuso vêm do cadastro do IBGE. O repositório gerado traz um README
-com o passo a passo para colocar o canal no ar.
+## Colocar no ar
 
-## Fonte de dados
-
-[MET Norway](https://api.met.no), gratuita e liberada para uso comercial
-(CC BY 4.0). Toda legenda credita a fonte e a licença, e as requisições se
-identificam com o @ e o repositório do canal. A MET Norway não fornece
-probabilidade de chuva nem rajada para o Brasil, então o Reel fala de
-milímetros previstos, horário da chuva e vento médio. O Open-Meteo continua no
-código, desligado em `config/fontes.yaml`.
-
-## Verificações
-
-| Comando | O que confere |
-| --- | --- |
-| `python -m pytest -q` | motor, roteiro, legenda, horários e o gerador dos 24 estados |
-| `python -m scripts.validar_estado` | coerência de `estado.yaml`, `locais.yaml` e workflows |
-| `python scripts/isolation_guard.py` | nenhum identificador de outro canal no código |
-| `python -m scripts.sincronizar_marca --check` | card "Seguir", avatar e `brand.yml` com a marca do canal |
+1. Settings → Actions → General → Workflow permissions: **Read and write**.
+2. Settings → Secrets and variables → Actions → **Variables**:
+   `AUTOMATION_ENABLED=false`, `EXPECTED_IG_USERNAME=previsaopr`.
+3. Rodar **CI**, **Coletar dados (sem publicação)** e **Validar estúdio HyperFrames**;
+   assistir aos dois MP4 (nomes, preposições, cenário, sigla).
+4. Conta @previsaopr profissional + app da Meta ("API do Instagram com login do
+   Instagram", escopos `instagram_business_basic`, `instagram_business_content_publish`,
+   `instagram_business_manage_insights`).
+5. **Secrets**: `IG_USER_ID`, `IG_ACCESS_TOKEN`, `GH_PAT_SECRETS` (fine-grained, só este
+   repo, Secrets: write).
+6. **Health — conexão com a Meta** → `verified` com @previsaopr.
+7. **Reel manual** sem publicar → revisar → com publicar → conferir no perfil.
+8. **Token — renovar IG** uma vez à mão; depois roda sozinho nos dias 1 e 15.
+9. `AUTOMATION_ENABLED=true`.
+10. cron-job.org, fuso `America/Sao_Paulo`, POST
+    `https://api.github.com/repos/pabloramoa-dev/previsao-pr/dispatches`:
+    `{"event_type":"reel_manha"}` às 05:35 e `{"event_type":"reel_noite"}` às 17:35.
