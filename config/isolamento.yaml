@@ -1,0 +1,13 @@
+# Identificadores de OUTROS canais que nao podem aparecer neste repositorio
+# (src, config, scripts, workflows, estudio). Verificado por
+# scripts/isolation_guard.py no CI. Num repositorio de estado, esta lista e
+# escrita por scripts/novo_estado.py com todos os canais da rede menos este.
+#
+# O modelo carrega o estado de referencia (config/estado.yaml); aqui ficam os
+# identificadores do pipeline anterior que deu origem ao motor.
+proibidos:
+  - "@previsaosulflu"
+  - previsaovr
+  - "27148485038175"
+  - previsao-sul-fluminense
+  - reels/previsao_lib
