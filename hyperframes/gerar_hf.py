@@ -428,7 +428,7 @@ def renderizar(out, pacote, qualidade='standard'):
     run(['ffmpeg', '-y', '-v', 'error', '-i', tmp,
          '-c:v', 'libx264', '-profile:v', 'main', '-level', '4.0', '-preset', 'medium',
          '-crf', '20', '-pix_fmt', 'yuv420p', '-r', '30',
-         '-c:a', 'aac', '-b:a', '160k', '-ar', '48000', '-movflags', '+faststart', final])
+         '-c:a', 'aac', '-b:a', '128k', '-ar', '48000', '-movflags', '+faststart', final])
     probe = conferir(final, pacote['dur'])
     relatorio = QA_DIRECAO.verificar(pacote, probe)
     QA_DIRECAO.salvar(out.with_suffix('.quality.json'), relatorio)
@@ -471,11 +471,10 @@ def entregar(personagem, out, pacote, batidas, segs, work):
 
 
 def main():
-    from src.previsao.editorial.formats import TITLES
     ap = argparse.ArgumentParser()
     ap.add_argument('--personagem', choices=('bira', 'bia'), default='bira')
     ap.add_argument('--out', required=True)
-    ap.add_argument('--format', choices=TITLES, default='antes_de_sair')
+    ap.add_argument('--format', choices=estado.FORMATOS, default='antes_de_sair')
     ap.add_argument('--topico', default=None)
     ap.add_argument('--qualidade', default='standard', choices=['draft', 'standard', 'high'])
     ap.add_argument('--so-html', action='store_true', help='só gera o index.html (sem render)')
