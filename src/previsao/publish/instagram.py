@@ -27,9 +27,22 @@ def _cfg():
     return user, token, version, expected
 
 
+class MetaAPIError(RuntimeError):
+    def __init__(self, response):
+        self.status = response.status_code
+        try:
+            error = response.json().get("error", {})
+        except (ValueError, AttributeError):
+            error = {}
+        self.code = error.get("code") if isinstance(error, dict) else None
+        if type(self.code) is not int:
+            self.code = None
+        super().__init__(f"Meta HTTP {self.status} (código {self.code})")
+
+
 def _check_response(response):
     if response.status_code >= 300:
-        raise RuntimeError(f"Meta HTTP {response.status_code}")
+        raise MetaAPIError(response)
 
 
 def _get(url, **kwargs):
@@ -54,7 +67,7 @@ def _post(url, **kwargs):
 
 def base_url(version: str) -> str:
     # Centralizado para permitir regressão controlada de versão/host.
-    return f"https://graph.instagram.com/{version}"
+    return f"https://graph.facebook.com/{version}"
 
 
 def verify_destination() -> dict:

@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/token_health.yml'
+      - 'src/previsao/publish/instagram.py'
 permissions:
   contents: read
 jobs:
@@ -28,7 +29,7 @@ jobs:
           python - <<'PY'
           import json, os
           from pathlib import Path
-          from src.previsao.publish.instagram import verify_destination
+          from src.previsao.publish.instagram import MetaAPIError, verify_destination
           missing = [name for name in ('IG_USER_ID','IG_ACCESS_TOKEN') if not os.environ.get(name)]
           from src.previsao import estado
           esperado = estado.handle()
@@ -39,6 +40,8 @@ jobs:
               try:
                   destination = verify_destination()
                   report.update(status='verified', username=destination.get('username'))
+              except MetaAPIError as exc:
+                  report.update(status='blocked', reason='meta_api_error', http_status=exc.status, meta_code=exc.code)
               except Exception:
                   report.update(status='blocked', reason='destination_or_token_not_verified')
           Path('output').mkdir(exist_ok=True)
