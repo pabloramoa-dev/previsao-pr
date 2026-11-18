@@ -28,10 +28,9 @@ Dados: [MET Norway](https://api.met.no) (licença CC BY 4.0, crédito em toda le
    `AUTOMATION_ENABLED=false`, `EXPECTED_IG_USERNAME=previsaopr`, `META_GRAPH_VERSION=v26.0`.
 3. Rodar **CI**, **Coletar dados (sem publicação)** e **Validar estúdio HyperFrames**;
    assistir aos dois MP4 (nomes, preposições, cenário, sigla).
-4. Conta @previsaopr profissional + app da Meta ("API do Instagram com login do
-   Instagram", escopos `instagram_business_basic`, `instagram_business_content_publish`).
-5. **Secrets**: `IG_USER_ID`, `IG_ACCESS_TOKEN`, `GH_PAT_SECRETS` (fine-grained, só este
-   repo, Secrets: write).
+4. Conta @previsaopr profissional e app da Meta com API do Instagram com login
+   unificado (escopos `instagram_basic` e `instagram_content_publish`).
+5. **Secrets**: `IG_USER_ID` e `IG_ACCESS_TOKEN`.
 6. O envio padrão usa os bytes do MP4 diretamente na Meta. Para homologar sem publicar, use **Reel manual** com fonte `live` e marque `validar_upload`. Se preferir hospedar o MP4 via HTTPS, use um bucket S3 dedicado. Configure `REEL_S3_BUCKET`, `REEL_S3_REGION`,
    `REEL_S3_ACCESS_KEY_ID` e `REEL_S3_SECRET_ACCESS_KEY` (as duas últimas em Secrets).
    O bucket deve servir `s3:GetObject` anônimo somente sob `previsaopr/*`,
