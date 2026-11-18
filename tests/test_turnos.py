@@ -220,7 +220,7 @@ def test_workflow_prepara_antes_e_publica_na_hora(caminho, alvo):
     assert preparo < passos.index('Coletar a previsão atual')
     assert passos.index('Render com a pauta escolhida') < publicar
     assert passos.index('QA') < publicar < passos.index('Publicar o Reel do dia')
-    assert publicar < passos.index('Hospedar MP4 em Release temporário')
+    assert publicar < passos.index('Hospedar MP4 temporário') < passos.index('Publicar o Reel do dia')
     # Ninguém espera horas: o disparo principal chega ~25 min antes do alvo.
     assert wf['jobs']['reel']['timeout-minutes'] <= 90
     assert wf['jobs']['reel']['env']['PREVISAO_HORA_ALVO'] == str(int(alvo[:2]))

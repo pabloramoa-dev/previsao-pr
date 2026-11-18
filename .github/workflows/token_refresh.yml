@@ -12,14 +12,21 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests pyyaml
       - name: Renovar token de longa duracao
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          EXPECTED_IG_USERNAME: ${{ vars.EXPECTED_IG_USERNAME }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
           GH_TOKEN: ${{ secrets.GH_PAT_SECRETS }}
         run: |
           set -euo pipefail
 
-          resp=$(curl -sS -G "https://graph.instagram.com/refresh_access_token" \
+          test -n "$GH_TOKEN" || { echo "GH_PAT_SECRETS ausente"; exit 1; }
+          python -c "from src.previsao.publish.instagram import verify_destination; verify_destination()"
+          resp=$(curl -fsS --max-time 30 -G "https://graph.instagram.com/refresh_access_token" \
             --data-urlencode "grant_type=ig_refresh_token" \
             --data-urlencode "access_token=${IG_ACCESS_TOKEN}")
 
@@ -28,11 +35,12 @@ jobs:
 
           if [ -z "$novo" ]; then
             echo "::error::Falha ao renovar o token do Instagram."
-            echo "$resp" | jq 'del(.access_token)'
             exit 1
           fi
 
           echo "::add-mask::$novo"
+          [[ "$exp" =~ ^[0-9]+$ ]]
+          IG_ACCESS_TOKEN="$novo" python -c "from src.previsao.publish.instagram import verify_destination; verify_destination()"
           dias=$(( exp / 86400 ))
           echo "Token renovado. Validade: ${dias} dias."
           echo "- Token renovado, validade **${dias} dias**." >> "$GITHUB_STEP_SUMMARY"

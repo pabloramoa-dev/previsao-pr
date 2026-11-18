@@ -14,6 +14,7 @@ emprestado de outra.
 from __future__ import annotations
 
 import math
+from datetime import datetime
 from typing import Any
 
 from .. import estado
@@ -55,14 +56,19 @@ def cinco_regioes(locations: list[dict[str, Any]], minimo: int = MINIMO) -> list
     por_id = {l.get('id'): l for l in validos}
     usados: set[str] = set()
     linhas: list[dict[str, Any]] = []
+    rodizio = estado.carregar().get('rodizio_municipios', False)
+    dia = datetime.now(estado.fuso()).date().toordinal() if rodizio else 0
     for rotulo, ids, zonas in _regioes():
+        if rodizio:
+            offset = dia % len(ids)
+            ids = ids[offset:] + ids[:offset]
         escolhido = next((por_id[i] for i in ids if i in por_id and i not in usados), None)
         if escolhido is None and zonas:
             escolhido = next((l for l in validos if l.get('zone') in zonas
                               and l.get('id') not in usados), None)
         if escolhido is not None:
             usados.add(escolhido.get('id'))
-            linhas.append(_linha(rotulo, escolhido, rotulo))
+            linhas.append(_linha(escolhido['name'] if rodizio else rotulo, escolhido, rotulo))
     for loc in validos:
         if len(linhas) >= minimo:
             break

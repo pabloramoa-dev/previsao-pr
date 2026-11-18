@@ -104,7 +104,7 @@ jobs:
 
       - name: Coletar dados ao vivo
         if: ${{ env.FONTE == 'live' }}
-        run: python -m scripts.collect_live output/snapshot.json
+        run: python -m scripts.collect_live output/snapshot.json --tier 2
 
       - name: Avaliar pautas e atualizar a fila
         if: ${{ env.FONTE == 'live' }}
@@ -169,7 +169,7 @@ jobs:
         with:
           name: reel-${{ github.run_id }}
           path: output/
-          retention-days: 14
+          retention-days: 3
 
       # ---------------------------------------------------------- publicação
 
@@ -182,28 +182,15 @@ jobs:
           EXPECTED_IG_USERNAME: ${{ vars.EXPECTED_IG_USERNAME }}
         run: python -c "from src.previsao.publish.instagram import verify_destination; print('destino:',verify_destination().get('username'))"
 
-      - name: Exigir repositório público para Release usado pela Meta
-        if: ${{ env.PUBLICAR == 'true' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          V=$(gh repo view "${{ github.repository }}" --json visibility -q .visibility)
-          test "$V" = "PUBLIC" || { echo "PUBLICAÇÃO BLOQUEADA: Release de repo privado não é URL pública para a Meta."; exit 1; }
-
-      - name: Hospedar MP4 em Release temporário
+      - name: Hospedar MP4 temporário
         if: ${{ env.PUBLICAR == 'true' }}
         id: media
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="reel-${{ github.run_id }}"
-          ARQS="output/REEL.mp4"
-          [ -f output/CAPA.jpg ] && ARQS="$ARQS output/CAPA.jpg"
-          gh release create "$TAG" $ARQS --title "$TAG" --notes "Reel manual do canal"
-          echo "url=https://github.com/${{ github.repository }}/releases/download/$TAG/REEL.mp4" >> "$GITHUB_OUTPUT"
-          if [ -f output/CAPA.jpg ]; then
-            echo "capa=https://github.com/${{ github.repository }}/releases/download/$TAG/CAPA.jpg" >> "$GITHUB_OUTPUT"
-          fi
+          AWS_ACCESS_KEY_ID: ${{ secrets.REEL_S3_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.REEL_S3_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.REEL_S3_REGION }}
+          REEL_S3_BUCKET: ${{ vars.REEL_S3_BUCKET }}
+        run: bash scripts/reel_s3.sh upload
 
       - name: Publicar Reel controlado
         if: ${{ env.PUBLICAR == 'true' }}
@@ -212,15 +199,17 @@ jobs:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v26.0' }}
           EXPECTED_IG_USERNAME: ${{ vars.EXPECTED_IG_USERNAME }}
-          PREVISAO_CAPA_URL: ${{ steps.media.outputs.capa }}
+          REEL_VIDEO_URL: ${{ steps.media.outputs.url }}
+          GH_TOKEN: ${{ github.token }}
+          CHECK_PUBLICATION_DEADLINE: ${{ github.event_name != 'workflow_dispatch' }}
         run: |
           export PREVISAO_CAPA_MS=$(cat output/capa_ms.txt 2>/dev/null || echo 0)
           python -m src.previsao.publish.cli \
-            --video-url "${{ steps.media.outputs.url }}" \
+            --video-url "$REEL_VIDEO_URL" \
             --caption-file output/LEGENDA.txt \
             --queue data/editorial_queue.json \
             --dedupe-key "${{ steps.pauta.outputs.dedupe_key }}" \
-            --publish
+            --persist-queue --publish
 
       - name: Persistir a fila no repositorio
         if: ${{ always() && env.PUBLICAR == 'true' && env.FONTE == 'live' }}
@@ -237,3 +226,12 @@ jobs:
           git commit -m "Fila editorial: estado apos execucao ${{ github.run_id }}"
           git pull --rebase --autostash origin "$GITHUB_REF_NAME"
           git push origin "HEAD:$GITHUB_REF_NAME"
+      - name: Iniciar retenção do MP4 confirmado
+        if: ${{ env.PUBLICAR == 'true' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.REEL_S3_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.REEL_S3_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.REEL_S3_REGION }}
+          REEL_S3_BUCKET: ${{ vars.REEL_S3_BUCKET }}
+          REEL_S3_KEY: ${{ steps.media.outputs.key }}
+        run: bash scripts/reel_s3.sh confirm

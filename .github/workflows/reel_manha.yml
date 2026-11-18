@@ -48,10 +48,6 @@ on:
       publicar:
         description: "Publicar no Instagram do canal? Desmarcado = só artifact"
         type: boolean
-        default: true
-      ignorar_trava:
-        description: "Publicar mesmo que já tenha saído Reel hoje"
-        type: boolean
         default: false
 
 permissions:
@@ -93,7 +89,6 @@ jobs:
         env:
           EVENTO: ${{ github.event_name }}
           IN_PUBLICAR: ${{ inputs.publicar }}
-          IN_IGNORAR: ${{ inputs.ignorar_trava }}
         run: |
           python3 - <<'PY'
           import datetime, json, os, pathlib
@@ -103,8 +98,7 @@ jobs:
           # do GitHub devolve C quando B é false — "não publicar" viraria
           # "publicar". Por isso a decisão é tomada aqui, em Python.
           manual = os.environ['EVENTO'] == 'workflow_dispatch'
-          publicar = os.environ.get('IN_PUBLICAR', '') != 'false' if manual else True
-          ignorar = manual and os.environ.get('IN_IGNORAR', '') == 'true'
+          publicar = os.environ.get('IN_PUBLICAR') == 'true' if manual else True
 
           hoje = datetime.datetime.now(
               datetime.timezone(datetime.timedelta(hours=int(os.environ['FUSO_UTC'])))).date().isoformat()
@@ -123,10 +117,13 @@ jobs:
           agora = datetime.datetime.now(
               datetime.timezone(datetime.timedelta(hours=int(os.environ['FUSO_UTC']))))
           hh, mm = (int(x) for x in os.environ['PRAZO'].split(':'))
-          atrasado = not manual and agora > agora.replace(
-              hour=hh, minute=mm, second=0, microsecond=0)
+          fim = agora.replace(hour=hh, minute=mm, second=0, microsecond=0)
+          alvo_h, alvo_m = (int(x) for x in os.environ['ALVO'].split(':'))
+          inicio = agora.replace(hour=alvo_h, minute=alvo_m, second=0, microsecond=0)
+          inicio -= datetime.timedelta(minutes=25)
+          atrasado = not manual and not inicio <= agora <= fim
 
-          pular = 'sim' if ((ja and not ignorar) or atrasado) else 'nao'
+          pular = 'sim' if ((ja and publicar) or atrasado) else 'nao'
           print(f'hoje={hoje} agora={agora:%H:%M} pular={pular} '
                 f'publicar={publicar} publicacoes_hoje={len(ja)} '
                 f'fora_do_prazo={atrasado}')
@@ -137,7 +134,7 @@ jobs:
           resumo = pathlib.Path(os.environ['GITHUB_STEP_SUMMARY'])
           if atrasado and not ja:
               resumo.write_text(
-                  f'### Disparo às {agora:%H:%M}, depois do prazo ({os.environ["PRAZO"]})\n\n'
+                  f'### Disparo às {agora:%H:%M}, fora da janela do turno\n\n'
                   'Nada foi preparado nem publicado. Para publicar mesmo assim, '
                   'use o botão "Run workflow".\n', encoding='utf-8')
           elif pular == 'sim':
@@ -197,7 +194,7 @@ jobs:
         run: python -m scripts.aguardar_horario preparar --alvo "$ALVO" --antes "$PREPARO_MIN"
 
       - name: Coletar a previsão atual
-        run: python -m scripts.collect_live output/snapshot.json
+        run: python -m scripts.collect_live output/snapshot.json --tier 2
 
       - name: Avaliar pautas e atualizar a fila
         run: python -m scripts.editorial_scan output/snapshot.json --out data/editorial_queue.json
@@ -267,7 +264,7 @@ jobs:
         with:
           name: reel-${{ github.run_id }}
           path: output/
-          retention-days: 14
+          retention-days: 3
 
       # ---------------------------------------------------------- publicação
 
@@ -285,28 +282,19 @@ jobs:
           EXPECTED_IG_USERNAME: ${{ vars.EXPECTED_IG_USERNAME }}
         run: python -c "from src.previsao.publish.instagram import verify_destination; print('destino:',verify_destination().get('username'))"
 
-      - name: Exigir repositório público para o Release que a Meta vai baixar
-        if: ${{ steps.pauta.outputs.seguir == 'sim' && needs.trava.outputs.publicar == 'true' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          V=$(gh repo view "${{ github.repository }}" --json visibility -q .visibility)
-          test "$V" = "PUBLIC" || { echo "PUBLICAÇÃO BLOQUEADA: Release de repo privado não é URL pública para a Meta."; exit 1; }
+      - name: Conferir prazo antes de enviar à Meta
+        if: ${{ steps.pauta.outputs.seguir == 'sim' && needs.trava.outputs.publicar == 'true' && github.event_name != 'workflow_dispatch' }}
+        run: python -m scripts.aguardar_horario prazo --prazo "$PRAZO"
 
-      - name: Hospedar MP4 em Release temporário
+      - name: Hospedar MP4 temporário
         if: ${{ steps.pauta.outputs.seguir == 'sim' && needs.trava.outputs.publicar == 'true' }}
         id: media
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="reel-${{ github.run_id }}"
-          ARQS="output/REEL.mp4"
-          [ -f output/CAPA.jpg ] && ARQS="$ARQS output/CAPA.jpg"
-          gh release create "$TAG" $ARQS --title "$TAG" --notes "Reel diário do canal"
-          echo "url=https://github.com/${{ github.repository }}/releases/download/$TAG/REEL.mp4" >> "$GITHUB_OUTPUT"
-          if [ -f output/CAPA.jpg ]; then
-            echo "capa=https://github.com/${{ github.repository }}/releases/download/$TAG/CAPA.jpg" >> "$GITHUB_OUTPUT"
-          fi
+          AWS_ACCESS_KEY_ID: ${{ secrets.REEL_S3_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.REEL_S3_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.REEL_S3_REGION }}
+          REEL_S3_BUCKET: ${{ vars.REEL_S3_BUCKET }}
+        run: bash scripts/reel_s3.sh upload
 
       - name: Publicar o Reel do dia
         if: ${{ steps.pauta.outputs.seguir == 'sim' && needs.trava.outputs.publicar == 'true' }}
@@ -315,20 +303,22 @@ jobs:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v26.0' }}
           EXPECTED_IG_USERNAME: ${{ vars.EXPECTED_IG_USERNAME }}
-          PREVISAO_CAPA_URL: ${{ steps.media.outputs.capa }}
+          REEL_VIDEO_URL: ${{ steps.media.outputs.url }}
+          GH_TOKEN: ${{ github.token }}
+          CHECK_PUBLICATION_DEADLINE: ${{ github.event_name != 'workflow_dispatch' }}
         run: |
           export PREVISAO_CAPA_MS=$(cat output/capa_ms.txt 2>/dev/null || echo 0)
           python -m src.previsao.publish.cli \
-            --video-url "${{ steps.media.outputs.url }}" \
+            --video-url "$REEL_VIDEO_URL" \
             --caption-file output/LEGENDA.txt \
             --queue data/editorial_queue.json \
             --dedupe-key "${{ steps.pauta.outputs.dedupe_key }}" \
-            --publish
+            --persist-queue --publish
 
       # A fila é o estado do publicador: precisa ser gravada mesmo quando a
       # publicação falhou no meio, senão o item fica 'publishing' só no runner.
       - name: Persistir a fila no repositório
-        if: ${{ always() && steps.pauta.outputs.seguir == 'sim' }}
+        if: ${{ always() && steps.pauta.outputs.seguir == 'sim' && needs.trava.outputs.publicar == 'true' }}
         run: |
           set -euo pipefail
           test -f data/editorial_queue.json || { echo "sem fila para persistir"; exit 0; }
@@ -343,20 +333,12 @@ jobs:
           git pull --rebase --autostash origin "$GITHUB_REF_NAME"
           git push origin "HEAD:$GITHUB_REF_NAME"
 
-      # O MP4 só precisa existir enquanto a Meta baixa. Guardar um Release por
-      # dia para sempre enche o repositório de mídia que ninguém usa.
-      - name: Apagar Releases de Reel com mais de 7 dias
-        if: ${{ always() && needs.trava.outputs.publicar == 'true' }}
+      - name: Iniciar retenção do MP4 confirmado
+        if: ${{ steps.pauta.outputs.seguir == 'sim' && needs.trava.outputs.publicar == 'true' }}
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          LIMITE=$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)
-          gh release list --repo "${{ github.repository }}" --limit 100 \
-            --json tagName,createdAt \
-            --jq ".[] | select(.createdAt < \"$LIMITE\") | select(.tagName | test(\"^(reel|pilot)-\")) | .tagName" \
-          | while read -r TAG; do
-              [ -z "$TAG" ] && continue
-              echo "apagando release $TAG"
-              gh release delete "$TAG" --repo "${{ github.repository }}" --cleanup-tag --yes
-            done
+          AWS_ACCESS_KEY_ID: ${{ secrets.REEL_S3_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.REEL_S3_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.REEL_S3_REGION }}
+          REEL_S3_BUCKET: ${{ vars.REEL_S3_BUCKET }}
+          REEL_S3_KEY: ${{ steps.media.outputs.key }}
+        run: bash scripts/reel_s3.sh confirm

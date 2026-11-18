@@ -67,7 +67,8 @@ _ELENCO = {
 class _Apresentadores(dict):
     """Elenco fixo (Bira e Bia); só o cargo do lower third é do estado."""
     def __getitem__(self, nome):
-        return dict(_ELENCO[nome], cargo=estado.cargo(nome))
+        return dict(_ELENCO[nome], cargo=estado.cargo(nome),
+                    nome=estado.carregar()['apresentadores'].get(nome, {}).get('nome', _ELENCO[nome]['nome']))
 
 
 APRESENTADOR = _Apresentadores()
@@ -346,6 +347,8 @@ def cena_quadro(p, cena, bat):
     so_volume = not tem("prob_chuva") and not tem("vento_kmh")
 
     def metricas(c):
+        if estado.carregar().get('rodizio_municipios'):
+            return f'<span>CHUVA <b>{metric(c, "chuva_mm", " mm", 1)}</b></span>'
         if so_volume:
             return (f'<span>CHUVA <b>{metric(c, "chuva_mm", " mm", 1)}</b></span>'
                     f'<span>VENTO <b>{metric(c, "vento_medio_kmh", " km/h")}</b></span>')
@@ -359,7 +362,7 @@ def cena_quadro(p, cena, bat):
    <div class="qd-barra"></div>
    <div class="qd-main"><div class="qd-cidade">{esc(c["nome"].upper())}</div>
    <div class="qd-cels"><span class="qd-min">{metric(c, "min", "°")}</span><span class="qd-max">{metric(c, "max", "°")}</span></div></div>
-   <div class="qd-metrics">{metricas(c)}</div>
+   <div class="qd-metrics{' qd-chuva' if estado.carregar().get('rodizio_municipios') else ''}">{metricas(c)}</div>
   </div>''')
     miolo = f'''{paisagem(p["ceu"], "qd")}
  <div class="qd-veu"></div>
@@ -537,6 +540,7 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-min {{ color:#9fd8ff; }}
 .qd-max {{ color:{YEL}; }}
 .qd-metrics {{ display:flex;justify-content:space-between;gap:10px;font-family:"BarlowCB",sans-serif;font-size:30px;color:#b9ccdd;line-height:30px; }}
+.qd-chuva {{ justify-content:center; }}
 .qd-metrics b {{ color:white;font-weight:700; }}
 .qd-dicas {{ font-family:"BarlowCB",sans-serif;font-size:26px;color:{YEL};margin-top:12px;text-align:center;line-height:1.25; }}
 /* ---------- alerta ---------- */

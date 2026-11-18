@@ -80,7 +80,7 @@ def svg_card(snapshot,loc,preview=False):
     parts+=['</g>',rect(72,179,48,48,mint,14),text(96,212,_estado.uf(),22,'#082537',800,'middle'),text(138,212,_estado.marca(),30,weight=800,spacing=1),text(1008,212,label,19,mint,700,'end',2)]
     parts +=[rect(72,273,235,48,'#244859',24),text(189,306,f"{weekdays[date.weekday()]}  •  {date:%d.%m}",22,'#D5E8EB',600,'middle')]
     name=loc['name']
-    parts +=[text(72,420,name,fitted(name,936),weight=800),text(76,471,('Baixada Fluminense' if loc.get('municipality') in {'duque_de_caxias','nova_iguacu'} else municipality or 'Rio metropolitano'),29,muted)]
+    parts +=[text(72,420,name,fitted(name,936),weight=800),text(76,471,('Baixada Fluminense' if loc.get('municipality') in {'duque_de_caxias','nova_iguacu'} else municipality or _estado.carregar()['nome']),29,muted)]
     parts +=[text(76,555,'MÁXIMA PREVISTA',22,mint,700,spacing=3),text(66,747,fmt(loc.get('max_c'),'°'),210,weight=800),text(80,810,'Mínima '+fmt(loc.get('min_c'),'°'),36,'#C8DEE5',600),icon(symbol,562,482,420),text(774,851,condition,24,'#D0E1E5',600,'middle')]
     cards=[('raindrop','CHUVA NO DIA',fmt(loc.get('rain_probability_pct'),'%'),'probabilidade'),('wind','RAJADAS',fmt(loc.get('wind_gust_max_kmh')),'km/h'),('uv-index','ÍNDICE UV',fmt(loc.get('uv_index_max')),'máximo previsto')]
     for i,(im,title,value,unit) in enumerate(cards):

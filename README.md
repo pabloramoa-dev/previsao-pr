@@ -1,7 +1,7 @@
 # Previsão PR — @previsaopr
 
 Reels automáticos de previsão do tempo no Paraná: **Bira do Tempo** às
-06:00 com a previsão de hoje e **Bia da Orla** às 18:00 com a de
+06:00 com a previsão de hoje e **Bia** às 18:00 com a de
 amanhã (hora local, UTC-3; 06:00 e 18:00 em Brasília).
 
 Gerado de `pabloramoa-dev/previsao-modelo` por `scripts/novo_estado.py`. Motor, personagens,
@@ -12,7 +12,7 @@ Dados: [MET Norway](https://api.met.no) (licença CC BY 4.0, crédito em toda le
 
 ## Quadro das seis regiões
 
-| Região | Âncora (todo Reel) | Reservas |
+| Região | Município | Alternativas no rodízio |
 | --- | --- | --- |
 | Curitiba | Curitiba | São José dos Pinhais, Colombo |
 | Litoral | Paranaguá | Matinhos, Guaratuba |
@@ -25,18 +25,29 @@ Dados: [MET Norway](https://api.met.no) (licença CC BY 4.0, crédito em toda le
 
 1. Settings → Actions → General → Workflow permissions: **Read and write**.
 2. Settings → Secrets and variables → Actions → **Variables**:
-   `AUTOMATION_ENABLED=false`, `EXPECTED_IG_USERNAME=previsaopr`.
+   `AUTOMATION_ENABLED=false`, `EXPECTED_IG_USERNAME=previsaopr`, `META_GRAPH_VERSION=v26.0`.
 3. Rodar **CI**, **Coletar dados (sem publicação)** e **Validar estúdio HyperFrames**;
    assistir aos dois MP4 (nomes, preposições, cenário, sigla).
 4. Conta @previsaopr profissional + app da Meta ("API do Instagram com login do
-   Instagram", escopos `instagram_business_basic`, `instagram_business_content_publish`,
-   `instagram_business_manage_insights`).
+   Instagram", escopos `instagram_business_basic`, `instagram_business_content_publish`).
 5. **Secrets**: `IG_USER_ID`, `IG_ACCESS_TOKEN`, `GH_PAT_SECRETS` (fine-grained, só este
    repo, Secrets: write).
-6. **Health — conexão com a Meta** → `verified` com @previsaopr.
-7. **Reel manual** sem publicar → revisar → com publicar → conferir no perfil.
-8. **Token — renovar IG** uma vez à mão; depois roda sozinho nos dias 1 e 15.
-9. `AUTOMATION_ENABLED=true`.
-10. cron-job.org, fuso `America/Sao_Paulo`, POST
+6. Use um bucket S3 dedicado. Configure `REEL_S3_BUCKET`, `REEL_S3_REGION`,
+   `REEL_S3_ACCESS_KEY_ID` e `REEL_S3_SECRET_ACCESS_KEY` (as duas últimas em Secrets).
+   O bucket deve servir `s3:GetObject` anônimo somente sob `previsaopr/*`,
+   sem listagem pública e sem ACL pública. Restrinja o principal do runner a
+   enviar e marcar objetos sob esse prefixo. A regra Lifecycle deve expirar
+   objetos do prefixo com a tag `publication=confirmed` após sete dias da
+   criação. Objetos pendentes ficam sem a tag e exigem conciliação antes da remoção.
+7. **Health — conexão com a Meta** → `verified` com @previsaopr.
+8. **Reel manual** sem publicar → revisar → com publicar → conferir no perfil.
+9. **Token — renovar IG** uma vez à mão; depois roda sozinho nos dias 1 e 15.
+10. `AUTOMATION_ENABLED=true`.
+11. cron-job.org, fuso `America/Sao_Paulo`, POST
     `https://api.github.com/repos/pabloramoa-dev/previsao-pr/dispatches`:
     `{"event_type":"reel_manha"}` às 05:35 e `{"event_type":"reel_noite"}` às 17:35.
+   Envie `Content-Type: application/json` e autentique com token fine-grained
+   restrito a este repositório e permissão Contents: write. Confira HTTP 204.
+   As reservas do Actions estão configuradas para 06:25, 07:25, 18:25 e 19:25.
+   A publicação manual de teste deve ser disparada separadamente, com autorização
+   explícita e dados ao vivo.

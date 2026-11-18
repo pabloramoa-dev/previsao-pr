@@ -169,7 +169,7 @@ def trilha(dur, cortes, sr):
 # ---------------------------------------------------------------- dados ---
 def bloco_do_formato(snapshot, formato):
     if formato == 'amanha_no_estado':
-        return snapshot['forecast'].get('tomorrow') or snapshot['forecast']['today']
+        return snapshot['forecast']['tomorrow']
     return snapshot['forecast']['today']
 
 
@@ -202,6 +202,12 @@ def demo_batidas(personagem):
     guardados = sorted((RAIZ / 'data' / 'snapshots').glob('20*.json'))
     fonte = guardados[-1] if guardados else DEMO_SNAPSHOT
     snap = json.loads(fonte.read_text(encoding='utf-8'))
+    if personagem == 'bia' and not snap['forecast'].get('tomorrow', {}).get('locations'):
+        if fonte != DEMO_SNAPSHOT:
+            snap = json.loads(DEMO_SNAPSHOT.read_text(encoding='utf-8'))
+            fonte = DEMO_SNAPSHOT
+        # Amostra sintética exclusiva de --demo. A produção exige dados de amanhã.
+        snap['forecast']['tomorrow'] = snap['forecast']['today']
     print(f'[demo] dados de {fonte.name} (sem publicação)')
     formato = 'amanha_no_estado' if personagem == 'bia' else 'antes_de_sair'
     fn = amanha_no_estado if formato == 'amanha_no_estado' else antes_de_sair
@@ -292,6 +298,18 @@ def preparar(personagem, out, snapshot=None, formato='antes_de_sair', topico=Non
     else:
         from src.previsao.editorial.formats import prepare
         snap, demo = snapshot, False
+        if estado.carregar().get('rodizio_municipios'):
+            from src.previsao.editorial.cinco import cinco_regioes, faltando
+            dia = dt.datetime.now(estado.fuso()).date()
+            if formato == 'amanha_no_estado':
+                dia += dt.timedelta(days=1)
+            bloco = bloco_do_formato(snapshot, formato)
+            linhas = cinco_regioes(bloco.get('locations', []))
+            if bloco.get('date') != dia.isoformat():
+                raise ValueError('Data da previsão diverge do turno')
+            ausentes = faltando(linhas)
+            if ausentes or any('chuva_mm' not in linha for linha in linhas):
+                raise ValueError(f'Quadro sem dados completos nas seis regiões: {ausentes}')
         batidas = prepare(snapshot, formato, topic=topico)['beats']
 
     # 1) voz -> linha do tempo real (com o mesmo corte editorial do Manim)
@@ -329,6 +347,9 @@ def preparar(personagem, out, snapshot=None, formato='antes_de_sair', topico=Non
     trans = [{'quadro': 'glitch', 'alerta': 'glitch', 'cta': 'flash-through-white'}
              .get(c['tipo'], 'whip-pan') for c in cenas[1:]]
     tr, sfx = trilha(dur, cortes, sr)
+    if estado.carregar().get('audio_so_narracao'):
+        tr.fill(0)
+        sfx.fill(0)
     gravar_wav(AUDIO / 'trilha.wav', tr, sr, estereo=True)
     gravar_wav(AUDIO / 'whoosh.wav', sfx, sr, estereo=True)
 

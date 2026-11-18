@@ -28,6 +28,7 @@ apresentadores:
   bira:
     cargo: TEMPO NO PARANÁ
   bia:
+    nome: BIA
     cargo: O TEMPO DE AMANHÃ NO PARANÁ
 hashtags:
   padrao: '#PrevisaoPR #Parana #TempoPR'
@@ -42,6 +43,8 @@ legenda:
   unidade: cidade
 formatos_desligados:
 - vai_ao_jogo
+rodizio_municipios: true
+audio_so_narracao: true
 regioes:
 - rotulo: Curitiba
   ids:

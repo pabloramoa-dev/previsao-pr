@@ -31,7 +31,7 @@ jobs:
           from src.previsao.publish.instagram import verify_destination
           missing = [name for name in ('IG_USER_ID','IG_ACCESS_TOKEN') if not os.environ.get(name)]
           from src.previsao import estado
-          esperado = (os.environ.get('EXPECTED_IG_USERNAME') or estado.handle()).lstrip('@')
+          esperado = estado.handle()
           report = {'publication': False, 'expected_username': esperado}
           if missing:
               report.update(status='blocked', reason='missing_credentials', missing=missing)
@@ -46,9 +46,12 @@ jobs:
           print(json.dumps(report))
           with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as summary:
               summary.write('## Conexão com a Meta\n\n'+json.dumps(report,indent=2)+'\n')
+          if report['status'] != 'verified':
+              raise SystemExit(1)
           PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: meta-health-${{ github.run_id }}
           path: output/meta-health.json
-          retention-days: 14
+          retention-days: 3
