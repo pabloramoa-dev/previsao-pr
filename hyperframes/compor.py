@@ -454,6 +454,7 @@ def legenda_html(p):
 
 # ------------------------------------------------------------- página ---
 def compor(p):
+    quadro_fixo = bool(estado.carregar().get("rodizio_municipios"))
     dur = p["dur"]
     bat = p["batidas"]
     cenas = p["cenas"]
@@ -540,7 +541,7 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-min {{ color:#9fd8ff; }}
 .qd-max {{ color:{YEL}; }}
 .qd-metrics {{ display:flex;justify-content:space-between;gap:10px;font-family:"BarlowCB",sans-serif;font-size:30px;color:#b9ccdd;line-height:30px; }}
-.qd-chuva {{ justify-content:center; }}
+.qd-chuva {{ position:absolute; left:0; right:0; bottom:18px; justify-content:center; }}
 .qd-metrics b {{ color:white;font-weight:700; }}
 .qd-dicas {{ font-family:"BarlowCB",sans-serif;font-size:26px;color:{YEL};margin-top:12px;text-align:center;line-height:1.25; }}
 /* ---------- alerta ---------- */
@@ -637,10 +638,15 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
   //    renderiza igual em qualquer máquina, inclusive no runner sem GPU.
   var tl = gsap.timeline({{ paused: true }});
   var TR = {json.dumps(transicoes)};
+  var quadroFixo = {json.dumps(quadro_fixo)};
   cenaIds.forEach(function (id, k) {{ tl.set("#" + id, {{ opacity: k === 0 ? 1 : 0, x: 0 }}, 0); }});
   TR.forEach(function (t, k) {{
     var A = "#" + cenaIds[k], B = "#" + cenaIds[k + 1], T = t.time, d = t.duration;
-    if (t.shader === "glitch") {{
+    if (quadroFixo && (D.cenas[k].tipo === "quadro" || D.cenas[k + 1].tipo === "quadro")) {{
+      var corte = D.cenas[k + 1].ini;
+      tl.set(A, {{ opacity: 0 }}, corte);
+      tl.set(B, {{ opacity: 1 }}, corte);
+    }} else if (t.shader === "glitch") {{
       var passos = [[-40, 6, 0.9], [55, -8, 0.4], [-25, 12, 1], [70, -4, 0.6], [-15, 3, 0.8], [30, -10, 0.5], [0, 0, 0]];
       passos.forEach(function (p, j) {{
         var tt = T + j * d / passos.length;
@@ -706,7 +712,7 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
       }}
     }}
     // 4) QUADRO — split-flap (Solari) das cinco regiões + destaque da falada
-    if (c.tipo === "quadro") {{
+    if (c.tipo === "quadro" && !quadroFixo) {{
       tl.fromTo(q(id, ".qd-topo"), {{ scale: 0.6, opacity: 0 }}, {{ scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2.2)" }}, c.ini + 0.05);
       tl.fromTo(q(id, ".qd-painel"), {{ y: 120, opacity: 0 }}, {{ y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }}, c.ini + 0.15);
       tl.fromTo(qa(id, ".qd-linha"), {{ x: -60, opacity: 0 }}, {{ x: 0, opacity: 1, duration: 0.3, stagger: 0.1, ease: "power2.out" }}, c.ini + 0.3);
