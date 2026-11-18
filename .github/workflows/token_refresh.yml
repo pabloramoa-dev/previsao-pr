@@ -1,52 +1,51 @@
-name: Token — renovar IG (60d)
+name: Token — validar credencial unificada
 
 on:
-  schedule:
-    - cron: '0 9 1,15 * *'
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# O SUAT deste app foi emitido sem expiração. O monitoramento semanal
+# roda em token_health.yml. O endpoint de refresh do Instagram Login
+# não se aplica a esse tipo de credencial.
 jobs:
-  refresh:
+  verificar:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
       - run: pip install requests pyyaml
-      - name: Renovar token de longa duracao
+      - name: Diagnosticar a conexão sem publicar nem revelar credenciais
         env:
-          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v26.0' }}
           EXPECTED_IG_USERNAME: ${{ vars.EXPECTED_IG_USERNAME }}
-          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
-          GH_TOKEN: ${{ secrets.GH_PAT_SECRETS }}
         run: |
-          set -euo pipefail
-
-          test -n "$GH_TOKEN" || { echo "GH_PAT_SECRETS ausente"; exit 1; }
-          python -c "from src.previsao.publish.instagram import verify_destination; verify_destination()"
-          resp=$(curl -fsS --max-time 30 -G "https://graph.instagram.com/refresh_access_token" \
-            --data-urlencode "grant_type=ig_refresh_token" \
-            --data-urlencode "access_token=${IG_ACCESS_TOKEN}")
-
-          novo=$(echo "$resp" | jq -r '.access_token // empty')
-          exp=$(echo  "$resp" | jq -r '.expires_in   // empty')
-
-          if [ -z "$novo" ]; then
-            echo "::error::Falha ao renovar o token do Instagram."
-            exit 1
-          fi
-
-          echo "::add-mask::$novo"
-          [[ "$exp" =~ ^[0-9]+$ ]]
-          IG_ACCESS_TOKEN="$novo" python -c "from src.previsao.publish.instagram import verify_destination; verify_destination()"
-          dias=$(( exp / 86400 ))
-          echo "Token renovado. Validade: ${dias} dias."
-          echo "- Token renovado, validade **${dias} dias**." >> "$GITHUB_STEP_SUMMARY"
-
-          printf '%s' "$novo" | gh secret set IG_ACCESS_TOKEN --repo "$GITHUB_REPOSITORY"
-
-          if [ "$dias" -lt 30 ]; then
-            echo "::warning::Renovacao devolveu menos de 30 dias — verificar o app na Meta."
-          fi
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from src.previsao.publish.instagram import verify_destination
+          missing = [name for name in ('IG_USER_ID','IG_ACCESS_TOKEN') if not os.environ.get(name)]
+          from src.previsao import estado
+          esperado = estado.handle()
+          report = {'publication': False, 'expected_username': esperado}
+          if missing:
+              report.update(status='blocked', reason='missing_credentials', missing=missing)
+          else:
+              try:
+                  destination = verify_destination()
+                  report.update(status='verified', username=destination.get('username'))
+              except Exception:
+                  report.update(status='blocked', reason='destination_or_token_not_verified')
+          Path('output').mkdir(exist_ok=True)
+          Path('output/meta-health.json').write_text(json.dumps(report,indent=2))
+          print(json.dumps(report))
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as summary:
+              summary.write('## Conexão com a Meta\n\n'+json.dumps(report,indent=2)+'\n')
+          if report['status'] != 'verified':
+              raise SystemExit(1)
+          PY

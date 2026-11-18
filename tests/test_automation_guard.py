@@ -40,12 +40,13 @@ def test_reel_diario_tem_mais_de_uma_tentativa_de_cron():
     """O cron do GitHub atrasa e às vezes engole a execução, então há mais de
     uma reserva. Elas rodam DEPOIS do alvo e antes do prazo: se o gatilho
     externo já publicou, encerram na trava; se não, publicam sem esperar.
-    Reserva antes do alvo deixaria o job horas parado segurando um runner."""
+    Uma reserva adicional fica a 25 minutos do alvo."""
     wf = carregar(MANHA)
     horas = _horas_locais_da_reserva(wf)
     alvo, prazo = (int(wf['env'][k].split(':')[0]) for k in ('ALVO', 'PRAZO'))
     assert len(horas) >= 2
-    assert all(alvo <= h < prazo for h in horas), horas
+    assert horas.count(alvo - 1) == 1
+    assert len([h for h in horas if alvo <= h < prazo]) >= 2
 
 
 def test_reel_diario_trava_segunda_publicacao_no_mesmo_dia():

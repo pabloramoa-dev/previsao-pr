@@ -3,6 +3,7 @@ import hashlib
 import os
 import re
 import time
+from pathlib import Path
 
 import requests
 
@@ -83,10 +84,10 @@ def verify_destination() -> dict:
     return data
 
 
-def create_reel(video_url: str, caption: str) -> str:
+def create_reel(video_url: str | None, caption: str, *, video_file: Path | None = None) -> str:
     user, token, version, _ = _cfg()
     corpo = {
-        "media_type":"REELS", "video_url":video_url, "caption":caption,
+        "media_type":"REELS", "caption":caption,
         "share_to_feed":"true"}
     # Capa da grade (o frame 0 do HyperFrames é só o cenário). Vem por variável
     # de ambiente para não mudar a assinatura usada pelo cli e pelos testes.
@@ -96,9 +97,27 @@ def create_reel(video_url: str, caption: str) -> str:
         corpo["thumb_offset"] = capa_ms
     if capa_url:
         corpo["cover_url"] = capa_url
+    if video_file is None:
+        corpo["video_url"] = video_url
+    else:
+        corpo["upload_type"] = "resumable"
     r = _post(f"{base_url(version)}/{user}/media", data=corpo, headers={"Authorization": f"Bearer {token}"}, timeout=30)
     _check_response(r)
-    return r.json()["id"]
+    container = r.json()["id"]
+    if video_file is not None:
+        if not re.fullmatch(r"[0-9]+", container):
+            raise RuntimeError("ID de contêiner inválido")
+        with video_file.open("rb") as file:
+            uploaded = _post(
+                f"https://rupload.facebook.com/ig-api-upload/{version}/{container}",
+                headers={"Authorization": f"OAuth {token}", "offset": "0",
+                         "file_size": str(video_file.stat().st_size)},
+                data=file, timeout=(10, 120),
+            )
+        _check_response(uploaded)
+        if uploaded.json().get("success") is not True:
+            raise RuntimeError("A Meta não confirmou o recebimento do MP4")
+    return container
 
 
 def wait_ready(container_id: str, timeout_s: int = 300) -> None:

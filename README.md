@@ -32,7 +32,7 @@ Dados: [MET Norway](https://api.met.no) (licença CC BY 4.0, crédito em toda le
    Instagram", escopos `instagram_business_basic`, `instagram_business_content_publish`).
 5. **Secrets**: `IG_USER_ID`, `IG_ACCESS_TOKEN`, `GH_PAT_SECRETS` (fine-grained, só este
    repo, Secrets: write).
-6. Use um bucket S3 dedicado. Configure `REEL_S3_BUCKET`, `REEL_S3_REGION`,
+6. O envio padrão usa os bytes do MP4 diretamente na Meta. Para homologar sem publicar, use **Reel manual** com fonte `live` e marque `validar_upload`. Se preferir hospedar o MP4 via HTTPS, use um bucket S3 dedicado. Configure `REEL_S3_BUCKET`, `REEL_S3_REGION`,
    `REEL_S3_ACCESS_KEY_ID` e `REEL_S3_SECRET_ACCESS_KEY` (as duas últimas em Secrets).
    O bucket deve servir `s3:GetObject` anônimo somente sob `previsaopr/*`,
    sem listagem pública e sem ACL pública. Restrinja o principal do runner a
@@ -41,13 +41,13 @@ Dados: [MET Norway](https://api.met.no) (licença CC BY 4.0, crédito em toda le
    criação. Objetos pendentes ficam sem a tag e exigem conciliação antes da remoção.
 7. **Health — conexão com a Meta** → `verified` com @previsaopr.
 8. **Reel manual** sem publicar → revisar → com publicar → conferir no perfil.
-9. **Token — renovar IG** uma vez à mão; depois roda sozinho nos dias 1 e 15.
+9. O diagnóstico semanal verifica o token de usuário do sistema do login unificado. O token foi configurado sem expiração. Se for revogado na Meta, reconecte a conta e substitua o Secret.
 10. `AUTOMATION_ENABLED=true`.
 11. cron-job.org, fuso `America/Sao_Paulo`, POST
     `https://api.github.com/repos/pabloramoa-dev/previsao-pr/dispatches`:
     `{"event_type":"reel_manha"}` às 05:35 e `{"event_type":"reel_noite"}` às 17:35.
    Envie `Content-Type: application/json` e autentique com token fine-grained
    restrito a este repositório e permissão Contents: write. Confira HTTP 204.
-   As reservas do Actions estão configuradas para 06:25, 07:25, 18:25 e 19:25.
+   As reservas do Actions estão configuradas para 05:35, 06:25, 07:25, 17:35, 18:25 e 19:25.
    A publicação manual de teste deve ser disparada separadamente, com autorização
    explícita e dados ao vivo.

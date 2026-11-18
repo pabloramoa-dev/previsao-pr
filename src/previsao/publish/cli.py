@@ -14,6 +14,7 @@ import argparse
 import os
 import subprocess
 import time
+from pathlib import Path
 
 from ..collectors.base import now
 from ..editorial.turnos import turno_do_formato
@@ -34,13 +35,18 @@ def persist_queue(queue: str, message: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument('--video-url', required=True)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument('--video-url')
+    source.add_argument('--video-file', type=Path)
+    parser.add_argument('--validate-upload', action='store_true')
     parser.add_argument('--caption-file', required=True)
     parser.add_argument('--publish', action='store_true')
     parser.add_argument('--queue', help='fila do motor editorial (JSON) a atualizar')
     parser.add_argument('--dedupe-key', help='item da fila a publicar; sem isso, o melhor pronto')
     parser.add_argument('--persist-queue', action='store_true')
     args = parser.parse_args()
+    if args.validate_upload and (args.publish or not args.video_file):
+        parser.error('--validate-upload exige --video-file e não aceita --publish')
     if args.persist_queue and (not args.queue or os.environ.get('GITHUB_REF') != 'refs/heads/main'):
         parser.error('--persist-queue exige fila e branch main')
 
@@ -59,6 +65,12 @@ def main() -> None:
 
     destination = verify_destination()
     print('destino_verificado=', destination.get('username'))
+
+    if args.validate_upload:
+        container = create_reel(None, caption, video_file=args.video_file)
+        wait_ready(container)
+        print('Upload processado pela Meta. Nenhuma publicação foi realizada.')
+        return
 
     if not args.publish:
         print('DRY-RUN: nenhum container foi criado; fila intacta')
@@ -83,7 +95,10 @@ def main() -> None:
 
     # Antes de media_publish nada foi ao ar: falha aqui devolve o item para a fila.
     try:
-        container = create_reel(args.video_url, caption)
+        if args.video_file:
+            container = create_reel(None, caption, video_file=args.video_file)
+        else:
+            container = create_reel(args.video_url, caption)
         wait_ready(container)
         if args.queue and state.stamp(candidate['expires_at']) <= now():
             raise RuntimeError('Validade da previsão encerrada durante o processamento')

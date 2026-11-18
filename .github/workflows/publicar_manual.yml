@@ -28,6 +28,10 @@ on:
         type: choice
         options: [manha, noite]
         default: manha
+      validar_upload:
+        description: "Enviar o MP4 à Meta e conferir processamento sem publicar"
+        type: boolean
+        default: false
       publicar:
         description: "Publicar no Instagram do canal? Desmarcado = somente artifact"
         type: boolean
@@ -173,6 +177,17 @@ jobs:
 
       # ---------------------------------------------------------- publicação
 
+      - name: Validar o upload na Meta sem publicar
+        if: inputs.validar_upload && !inputs.publicar && inputs.fonte == 'live'
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION || 'v26.0' }}
+          EXPECTED_IG_USERNAME: ${{ vars.EXPECTED_IG_USERNAME }}
+        run: |
+          python -m src.previsao.publish.cli --video-file output/REEL.mp4 \
+            --caption-file output/LEGENDA.txt --validate-upload
+
       - name: Verificar Meta e conta de destino
         if: ${{ env.PUBLICAR == 'true' }}
         env:
@@ -183,7 +198,7 @@ jobs:
         run: python -c "from src.previsao.publish.instagram import verify_destination; print('destino:',verify_destination().get('username'))"
 
       - name: Hospedar MP4 temporário
-        if: ${{ env.PUBLICAR == 'true' }}
+        if: ${{ env.PUBLICAR == 'true' && vars.REEL_S3_BUCKET != '' }}
         id: media
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.REEL_S3_ACCESS_KEY_ID }}
@@ -204,8 +219,9 @@ jobs:
           CHECK_PUBLICATION_DEADLINE: ${{ github.event_name != 'workflow_dispatch' }}
         run: |
           export PREVISAO_CAPA_MS=$(cat output/capa_ms.txt 2>/dev/null || echo 0)
-          python -m src.previsao.publish.cli \
-            --video-url "$REEL_VIDEO_URL" \
+          video=(--video-file output/REEL.mp4)
+          if [[ -n "$REEL_VIDEO_URL" ]]; then video=(--video-url "$REEL_VIDEO_URL"); fi
+          python -m src.previsao.publish.cli "${video[@]}" \
             --caption-file output/LEGENDA.txt \
             --queue data/editorial_queue.json \
             --dedupe-key "${{ steps.pauta.outputs.dedupe_key }}" \
@@ -227,7 +243,7 @@ jobs:
           git pull --rebase --autostash origin "$GITHUB_REF_NAME"
           git push origin "HEAD:$GITHUB_REF_NAME"
       - name: Iniciar retenção do MP4 confirmado
-        if: ${{ env.PUBLICAR == 'true' }}
+        if: ${{ env.PUBLICAR == 'true' && vars.REEL_S3_BUCKET != '' }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.REEL_S3_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.REEL_S3_SECRET_ACCESS_KEY }}

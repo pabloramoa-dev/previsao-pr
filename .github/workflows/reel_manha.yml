@@ -16,7 +16,7 @@ name: Reel da manhã
 # manual (botão "Run workflow") não espera nada.
 #
 # RESERVA. O `schedule` do GitHub atrasa ou descarta execuções, então ele não
-# é o gatilho principal. Os dois crons abaixo rodam DEPOIS do alvo (ALVO+25 e
+# substitui o gatilho principal. Há um cron antes do alvo e dois DEPOIS do alvo (ALVO+25 e
 # ALVO+85 min): se o turno já publicou, a `trava` encerra em segundos; se não
 # publicou, preparam e publicam na hora, sem espera. Nenhum job fica horas
 # parado segurando um runner — com dezenas de canais na mesma conta, isso
@@ -36,6 +36,7 @@ name: Reel da manhã
 
 on:
   schedule:
+    - cron: "35 8 * * *"   # fallback antes do alvo, independente do gatilho externo
     - cron: "25 9 * * *"   # gerado: reserva 1 (ALVO+25 em UTC)
     - cron: "25 10 * * *"   # gerado: reserva 2 (ALVO+85 em UTC)
   # GATILHO PRINCIPAL: cron-job.org, 25 minutos antes do ALVO no fuso do canal,
@@ -287,7 +288,7 @@ jobs:
         run: python -m scripts.aguardar_horario prazo --prazo "$PRAZO"
 
       - name: Hospedar MP4 temporário
-        if: ${{ steps.pauta.outputs.seguir == 'sim' && needs.trava.outputs.publicar == 'true' }}
+        if: ${{ steps.pauta.outputs.seguir == 'sim' && needs.trava.outputs.publicar == 'true' && vars.REEL_S3_BUCKET != '' }}
         id: media
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.REEL_S3_ACCESS_KEY_ID }}
@@ -308,8 +309,9 @@ jobs:
           CHECK_PUBLICATION_DEADLINE: ${{ github.event_name != 'workflow_dispatch' }}
         run: |
           export PREVISAO_CAPA_MS=$(cat output/capa_ms.txt 2>/dev/null || echo 0)
-          python -m src.previsao.publish.cli \
-            --video-url "$REEL_VIDEO_URL" \
+          video=(--video-file output/REEL.mp4)
+          if [[ -n "$REEL_VIDEO_URL" ]]; then video=(--video-url "$REEL_VIDEO_URL"); fi
+          python -m src.previsao.publish.cli "${video[@]}" \
             --caption-file output/LEGENDA.txt \
             --queue data/editorial_queue.json \
             --dedupe-key "${{ steps.pauta.outputs.dedupe_key }}" \
@@ -334,7 +336,7 @@ jobs:
           git push origin "HEAD:$GITHUB_REF_NAME"
 
       - name: Iniciar retenção do MP4 confirmado
-        if: ${{ steps.pauta.outputs.seguir == 'sim' && needs.trava.outputs.publicar == 'true' }}
+        if: ${{ steps.pauta.outputs.seguir == 'sim' && needs.trava.outputs.publicar == 'true' && vars.REEL_S3_BUCKET != '' }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.REEL_S3_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.REEL_S3_SECRET_ACCESS_KEY }}
