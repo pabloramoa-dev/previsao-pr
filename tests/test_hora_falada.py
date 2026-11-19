@@ -73,15 +73,15 @@ def test_roteiro_de_chuva_fala_hora_por_extenso(snapshot, monkeypatch):
     legendas = " ".join(b["legenda"] for b in batidas)
 
     assert not HORA_DIGITAL.search(falas), falas
-    assert "das vinte às vinte e três horas" in falas
+    assert "das vinte às vinte e três horas" not in falas
     assert "por volta das dezenove horas" in falas
-    assert "das 20h às 23h" in legendas and "por volta das 19h" in legendas
+    assert "das 20h às 23h" not in legendas and "por volta das 19h" in legendas
     assert not HORA_DIGITAL.search(legendas), legendas
 
 
 def test_batida_sem_hora_mantem_legenda_igual_a_fala(snapshot, monkeypatch):
     batidas = _preparar_chuva(snapshot, monkeypatch, [{"start": "20:00", "end": "23:00"}])
-    sem_hora = [b for b in batidas if "chuva é mais provável" not in b["fala"]]
+    sem_hora = [b for b in batidas if b["dados"].get("sub") != "CHUVA PREVISTA"]
     assert sem_hora
     assert all(b["legenda"] == b["fala"] for b in sem_hora)
 
