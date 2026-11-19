@@ -208,7 +208,7 @@ def paisagem(ceu, uid, com_sol=True):
             x, y = rng.randint(-100, 1100), rng.randint(0, 1500)
             linhas.append(f'<line x1="{x}" y1="{y}" x2="{x - 14}" y2="{y + 52}" stroke="#dbe9f5" '
                           f'stroke-width="4" stroke-linecap="round" opacity="0.75"/>')
-        chuva = f'<g class="{uid}-chuva">{"".join(linhas)}</g>'
+        chuva = f'<g class="{uid}-chuva" data-weather-rain="true">{"".join(linhas)}</g>'
     corpo = cenarios.desenhar(estado.cenario(), morro=morro, mar=mar, uid=uid, rng=rng, pt=PT, red=RED)
     return f'''
 <svg class="paisagem" viewBox="0 0 1080 1920" width="1080" height="1920" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
@@ -348,7 +348,7 @@ def cena_quadro(p, cena, bat):
 
     def metricas(c):
         if estado.carregar().get('rodizio_municipios'):
-            return f'<span>CHUVA <b>{metric(c, "chuva_mm", " mm", 1)}</b></span>'
+            return f'<span><b>{metric(c, "chuva_mm", " mm", 1)}</b></span>'
         if so_volume:
             return (f'<span>CHUVA <b>{metric(c, "chuva_mm", " mm", 1)}</b></span>'
                     f'<span>VENTO <b>{metric(c, "vento_medio_kmh", " km/h")}</b></span>')
@@ -367,8 +367,8 @@ def cena_quadro(p, cena, bat):
     miolo = f'''{paisagem(p["ceu"], "qd")}
  <div class="qd-veu"></div>
  <div class="qd-topo"><span class="qd-check">✓</span><span class="qd-titulo">{esc(res["dados"].get("titulo", "NA REGIÃO"))}</span></div>
- <div class="qd-painel">
-  <div class="qd-head"><span>AS {len(cidades)} REGIÕES</span><span class="qd-cols"><b>MÍN</b><b>MÁX</b></span></div>
+ <div class="qd-painel{' qd-fixo' if estado.carregar().get('rodizio_municipios') else ''}">
+  <div class="qd-head"><span>AS {len(cidades)} REGIÕES</span>{'<span class="qd-chuva-titulo">CHUVA</span>' if estado.carregar().get('rodizio_municipios') else ''}<span class="qd-cols"><b>MÍN</b><b>MÁX</b></span></div>
   {"".join(linhas)}
   <div class="qd-dicas" data-qa-bounds="true">{esc(" · ".join(p.get("dicas_praticas", [])))}</div>
  </div>'''
@@ -541,7 +541,11 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-min {{ color:#9fd8ff; }}
 .qd-max {{ color:{YEL}; }}
 .qd-metrics {{ display:flex;justify-content:space-between;gap:10px;font-family:"BarlowCB",sans-serif;font-size:30px;color:#b9ccdd;line-height:30px; }}
-.qd-chuva {{ position:absolute; left:0; right:0; bottom:18px; justify-content:center; }}
+.qd-fixo .qd-head {{ position:relative; }}
+.qd-chuva-titulo {{ position:absolute; left:420px; right:194px; text-align:center; font-size:30px; letter-spacing:0; }}
+.qd-fixo .qd-cidade {{ max-width:398px; white-space:normal; font-size:36px; line-height:1; }}
+.qd-chuva {{ position:absolute; left:420px; right:194px; top:8px; height:48px; align-items:center; justify-content:center; transform:none; }}
+.qd-fixo .qd-main {{ height:48px; }}
 .qd-metrics b {{ color:white;font-weight:700; }}
 .qd-dicas {{ font-family:"BarlowCB",sans-serif;font-size:26px;color:{YEL};margin-top:12px;text-align:center;line-height:1.25; }}
 /* ---------- alerta ---------- */
@@ -853,7 +857,7 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
   document.querySelectorAll("[class$='-raios']").forEach(function (r) {{
     tl.fromTo(r, {{ rotation: 0, svgOrigin: "0 0" }}, {{ rotation: 40, duration: D.dur, ease: "none" }}, 0);
   }});
-  document.querySelectorAll("[class$='-chuva']").forEach(function (c) {{
+  document.querySelectorAll(".paisagem [data-weather-rain]").forEach(function (c) {{
     tl.fromTo(c, {{ y: -120 }}, {{ y: 0, duration: 0.35, repeat: Math.floor(D.dur / 0.35), ease: "none" }}, 0);
   }});
 
