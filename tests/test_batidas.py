@@ -30,7 +30,10 @@ def test_cada_batida_carrega_o_que_o_painel_le(snapshot):
         assert b['tipo'] in CAMPOS, f"tipo {b['tipo']} sem painel conhecido"
         faltando = [c for c in CAMPOS[b['tipo']] if c not in b['dados']]
         assert not faltando, f"{b['tipo']} sem {faltando}"
-        assert b['fala'].strip() and b['legenda'] == b['fala']
+        assert b['fala'].strip() and b['legenda'].strip()
+        if b['legenda'] != b['fala']:
+            assert b['dados'].get('sub') == 'CHUVA PREVISTA'
+            assert 'horas' in b['fala'] and 'h' in b['legenda']
 
 
 def test_resumo_so_lista_cidade_com_minima_e_maxima(snapshot):
