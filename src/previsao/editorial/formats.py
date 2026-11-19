@@ -82,16 +82,15 @@ def _mm(valor):
 def batida_chuva(locs, amanha=False):
     """A batida de chuva do Reel-base, com o melhor dado que a coleta trouxe.
 
-    1. Probabilidade (quando o provedor dá): "chance de chuva de 70 por cento".
-    2. Só volume (MET Norway no Brasil): milímetros previstos no ponto mais
-       chuvoso — ou, se nenhum ponto chega ao limiar, "sem chuva significativa".
-       Volume nunca é anunciado como chance.
+    1. Maior volume previsto entre os pontos consultados; abaixo do limiar,
+       informa que não há chuva significativa. Volume nunca vira chance.
+    2. Sem volume disponível, usa a maior probabilidade como alternativa.
     3. Nenhum dos dois: diz que o dado não veio. Nunca inventa.
     """
     quando = 'amanhã' if amanha else 'no dia'
     sufixo = ' AMANHÃ' if amanha else ''
     com_prob = [e for e in locs if number(e.get('rain_probability_pct'))]
-    if com_prob:
+    if com_prob and not any(number(e.get('rain_mm')) for e in locs):
         molhado = max(com_prob, key=lambda e: e['rain_probability_pct'])
         pct = molhado['rain_probability_pct']
         fala = (f"{em_local(molhado['name'], inicio=True)}, a chance de chuva amanhã é de {pct:g} por cento."
@@ -249,6 +248,19 @@ def prepare(snapshot, format='antes_de_sair', reference=None, history=None, topi
     lines = []
     if format == 'chove_onde':
         topic = candidate['topic']
+        if topic in {'chuva', 'janela_chuva'}:
+            # Uma única localidade: maior volume entre TODOS os pontos do dia,
+            # não apenas os primeiros locais selecionados pela pauta.
+            todas = snapshot['forecast']['today']['locations']
+            beats = [batida_chuva(todas)]
+            resumo = batida_resumo(todas, 'HOJE NA REGIÃO')
+            if resumo:
+                beats.append(resumo)
+            beats.append(batida(f'Manda pra quem vai sair {estado.em()}.', 'cta'))
+            if candidate['language'] == 'probabilistic':
+                beats.insert(0, batida('O cenário ainda tem incerteza.'))
+            return {'title': TITLES[format], 'candidate': candidate,
+                    'beats': beats, 'publication': False}
         metric, unit = {'temperatura':('max_c','graus'), 'vento':('wind_gust_max_kmh','quilômetros por hora'),
                         'chuva':('rain_probability_pct','por cento')} .get(topic, ('rain_mm', 'milímetros'))
         janelas = []   # (leitura, [nomes]) na ordem em que aparecem
