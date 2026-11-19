@@ -133,7 +133,7 @@
     "created_at": "2026-11-18T12:41:00.262597-03:00",
     "expires_at": "2026-11-18T14:41:00-03:00",
     "vetoes": [],
-    "status": "ready",
+    "status": "expired",
     "confidence": 78.4,
     "language": "forecast"
   },
@@ -496,7 +496,7 @@
     "created_at": "2026-11-18T12:41:00.262597-03:00",
     "expires_at": "2026-11-18T14:41:00-03:00",
     "vetoes": [],
-    "status": "ready",
+    "status": "expired",
     "confidence": 78.4,
     "language": "forecast"
   },
@@ -693,7 +693,7 @@
     "created_at": "2026-11-18T12:41:00.262597-03:00",
     "expires_at": "2026-11-18T14:41:00-03:00",
     "vetoes": [],
-    "status": "ready",
+    "status": "expired",
     "confidence": 78.4,
     "language": "forecast"
   },
@@ -816,6 +816,754 @@
     "dedupe_key": "18d5496d6b47a3f914b4da2e749489656d0b45ce97db2e29528c3a1c647c9ac7",
     "created_at": "2026-11-18T12:41:00.262597-03:00",
     "expires_at": "2026-11-18T14:41:00-03:00",
+    "vetoes": [],
+    "status": "expired",
+    "confidence": 78.4,
+    "language": "forecast"
+  },
+  {
+    "format": "fim_de_semana",
+    "topic": "fim_de_semana",
+    "location_ids": [
+      "cascavel",
+      "curitiba",
+      "londrina",
+      "maringa",
+      "paranagua",
+      "ponta_grossa",
+      "apucarana",
+      "castro",
+      "colombo",
+      "cornelio_procopio",
+      "foz_do_iguacu",
+      "guaratuba",
+      "matinhos",
+      "paranavai",
+      "sao_jose_dos_pinhais",
+      "telemaco_borba",
+      "toledo",
+      "umuarama"
+    ],
+    "facts": {
+      "cascavel": {
+        "max_c": 22,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "curitiba": {
+        "max_c": 20,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "londrina": {
+        "max_c": 26,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "maringa": {
+        "max_c": 24,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "paranagua": {
+        "max_c": 23,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "ponta_grossa": {
+        "max_c": 19,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "apucarana": {
+        "max_c": 22,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "castro": {
+        "max_c": 19,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "colombo": {
+        "max_c": 19,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "cornelio_procopio": {
+        "max_c": 23,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "foz_do_iguacu": {
+        "max_c": 23,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "guaratuba": {
+        "max_c": 23,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "matinhos": {
+        "max_c": 22,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "paranavai": {
+        "max_c": 25,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "sao_jose_dos_pinhais": {
+        "max_c": 20,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "telemaco_borba": {
+        "max_c": 20,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "toledo": {
+        "max_c": 23,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "umuarama": {
+        "max_c": 25,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      }
+    },
+    "parts": {
+      "utility": 4,
+      "urgency": 3,
+      "contrast": 3,
+      "shareability": 5,
+      "novelty": 5
+    },
+    "extra": {
+      "dates": [
+        "2026-11-21",
+        "2026-11-22"
+      ],
+      "forecast": {
+        "2026-11-21": [
+          {
+            "id": "cascavel",
+            "max_c": 26,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "curitiba",
+            "max_c": 28,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "londrina",
+            "max_c": 27,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "maringa",
+            "max_c": 28,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "paranagua",
+            "max_c": 29,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "ponta_grossa",
+            "max_c": 26,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "apucarana",
+            "max_c": 25,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "castro",
+            "max_c": 27,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "colombo",
+            "max_c": 28,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "cornelio_procopio",
+            "max_c": 26,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "foz_do_iguacu",
+            "max_c": 30,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "guaratuba",
+            "max_c": 28,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "matinhos",
+            "max_c": 28,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "paranavai",
+            "max_c": 28,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "sao_jose_dos_pinhais",
+            "max_c": 27,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "telemaco_borba",
+            "max_c": 26,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "toledo",
+            "max_c": 25,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "umuarama",
+            "max_c": 28,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          }
+        ],
+        "2026-11-22": [
+          {
+            "id": "cascavel",
+            "max_c": 25,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "curitiba",
+            "max_c": 26,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "londrina",
+            "max_c": 30,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "maringa",
+            "max_c": 30,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "paranagua",
+            "max_c": 32,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "ponta_grossa",
+            "max_c": 24,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "apucarana",
+            "max_c": 27,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "castro",
+            "max_c": 26,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "colombo",
+            "max_c": 26,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "cornelio_procopio",
+            "max_c": 30,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "foz_do_iguacu",
+            "max_c": 27,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "guaratuba",
+            "max_c": 27,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "matinhos",
+            "max_c": 29,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "paranavai",
+            "max_c": 29,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "sao_jose_dos_pinhais",
+            "max_c": 27,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "telemaco_borba",
+            "max_c": 28,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "toledo",
+            "max_c": 26,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          },
+          {
+            "id": "umuarama",
+            "max_c": 26,
+            "rain_probability_pct": null,
+            "wind_gust_max_kmh": null
+          }
+        ]
+      }
+    },
+    "total": 20,
+    "classification": "reel_priority",
+    "turno": "manha",
+    "character": "bira",
+    "hook_key": "300441ccb76900da234d",
+    "dedupe_key": "b89c7c345bfc0a95131b93c8025c96e458c395919989d3a7b70d42d0bdd8162f",
+    "created_at": "2026-11-18T20:55:48.535707-03:00",
+    "expires_at": "2026-11-18T22:55:48-03:00",
+    "vetoes": [],
+    "status": "ready",
+    "confidence": 78.4,
+    "language": "forecast"
+  },
+  {
+    "format": "amanha_no_estado",
+    "topic": "amanha",
+    "location_ids": [
+      "cascavel",
+      "curitiba",
+      "londrina",
+      "maringa",
+      "paranagua",
+      "ponta_grossa",
+      "apucarana",
+      "castro",
+      "colombo",
+      "cornelio_procopio",
+      "foz_do_iguacu",
+      "guaratuba",
+      "matinhos",
+      "paranavai",
+      "sao_jose_dos_pinhais",
+      "telemaco_borba",
+      "toledo",
+      "umuarama"
+    ],
+    "facts": {
+      "cascavel": {
+        "max_c": 28,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "curitiba": {
+        "max_c": 29,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "londrina": {
+        "max_c": 31,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "maringa": {
+        "max_c": 30,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "paranagua": {
+        "max_c": 30,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "ponta_grossa": {
+        "max_c": 28,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "apucarana": {
+        "max_c": 28,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "castro": {
+        "max_c": 28,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "colombo": {
+        "max_c": 30,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "cornelio_procopio": {
+        "max_c": 30,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "foz_do_iguacu": {
+        "max_c": 30,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "guaratuba": {
+        "max_c": 27,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "matinhos": {
+        "max_c": 29,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "paranavai": {
+        "max_c": 30,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "sao_jose_dos_pinhais": {
+        "max_c": 29,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "telemaco_borba": {
+        "max_c": 30,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "toledo": {
+        "max_c": 28,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "umuarama": {
+        "max_c": 28,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      }
+    },
+    "parts": {
+      "utility": 5,
+      "urgency": 3,
+      "contrast": 3,
+      "shareability": 4,
+      "novelty": 5
+    },
+    "extra": {
+      "date": "2026-11-19"
+    },
+    "total": 20,
+    "classification": "reel_priority",
+    "turno": "noite",
+    "character": "bia",
+    "hook_key": "4afaccd1be95254134d2",
+    "dedupe_key": "f017cfa6837aa21d1b73c50892ffa389ae304c284de1a79dcb44cffddcaeb9fa",
+    "created_at": "2026-11-18T20:55:48.535707-03:00",
+    "expires_at": "2026-11-18T22:55:48-03:00",
+    "vetoes": [],
+    "status": "publishing",
+    "confidence": 78.4,
+    "language": "forecast",
+    "claimed_at": "2026-11-18T21:00:45-03:00"
+  },
+  {
+    "format": "chove_onde",
+    "topic": "janela_chuva",
+    "location_ids": [
+      "cascavel",
+      "paranavai",
+      "toledo",
+      "umuarama"
+    ],
+    "facts": {
+      "cascavel": {
+        "max_c": 22,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "paranavai": {
+        "max_c": 25,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "toledo": {
+        "max_c": 23,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "umuarama": {
+        "max_c": 25,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      }
+    },
+    "parts": {
+      "utility": 4,
+      "urgency": 4,
+      "contrast": 0,
+      "shareability": 4,
+      "novelty": 5
+    },
+    "extra": {},
+    "total": 17,
+    "classification": "reel",
+    "turno": "manha",
+    "character": "bira",
+    "hook_key": "96eea8e6803b2e600a05",
+    "dedupe_key": "3777474ef12c209f620f37237ec17292d0098e5681531d0c624575b6c2abee35",
+    "created_at": "2026-11-18T20:55:48.535707-03:00",
+    "expires_at": "2026-11-18T22:55:48-03:00",
+    "vetoes": [],
+    "status": "ready",
+    "confidence": 78.4,
+    "language": "forecast"
+  },
+  {
+    "format": "antes_de_sair",
+    "topic": "resumo",
+    "location_ids": [
+      "cascavel",
+      "curitiba",
+      "londrina",
+      "maringa",
+      "paranagua",
+      "ponta_grossa",
+      "apucarana",
+      "castro",
+      "colombo",
+      "cornelio_procopio",
+      "foz_do_iguacu",
+      "guaratuba",
+      "matinhos",
+      "paranavai",
+      "sao_jose_dos_pinhais",
+      "telemaco_borba",
+      "toledo",
+      "umuarama"
+    ],
+    "facts": {
+      "cascavel": {
+        "max_c": 22,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "curitiba": {
+        "max_c": 20,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "londrina": {
+        "max_c": 26,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "maringa": {
+        "max_c": 24,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "paranagua": {
+        "max_c": 23,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "ponta_grossa": {
+        "max_c": 19,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "apucarana": {
+        "max_c": 22,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "castro": {
+        "max_c": 19,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "colombo": {
+        "max_c": 19,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "cornelio_procopio": {
+        "max_c": 23,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "foz_do_iguacu": {
+        "max_c": 23,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "guaratuba": {
+        "max_c": 23,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "matinhos": {
+        "max_c": 22,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "paranavai": {
+        "max_c": 25,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "sao_jose_dos_pinhais": {
+        "max_c": 20,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "telemaco_borba": {
+        "max_c": 20,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "toledo": {
+        "max_c": 23,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "umuarama": {
+        "max_c": 25,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      }
+    },
+    "parts": {
+      "utility": 3,
+      "urgency": 3,
+      "contrast": 3,
+      "shareability": 3,
+      "novelty": 5
+    },
+    "extra": {},
+    "total": 17,
+    "classification": "reel",
+    "turno": "manha",
+    "character": "bira",
+    "hook_key": "c07f1b18beb1ff7c2b12",
+    "dedupe_key": "7a439dc339f028e6e41b12d96e7784870c54210c8f8a7453002f515d3ada0b4d",
+    "created_at": "2026-11-18T20:55:48.535707-03:00",
+    "expires_at": "2026-11-18T22:55:48-03:00",
+    "vetoes": [],
+    "status": "ready",
+    "confidence": 78.4,
+    "language": "forecast"
+  },
+  {
+    "format": "chove_onde",
+    "topic": "temperatura",
+    "location_ids": [
+      "londrina",
+      "ponta_grossa"
+    ],
+    "facts": {
+      "londrina": {
+        "max_c": 26,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      },
+      "ponta_grossa": {
+        "max_c": 19,
+        "rain_probability_pct": null,
+        "wind_gust_max_kmh": null
+      }
+    },
+    "parts": {
+      "utility": 5,
+      "urgency": 2,
+      "contrast": 3,
+      "shareability": 3,
+      "novelty": 3
+    },
+    "extra": {
+      "contrast": {
+        "spread": 7.0,
+        "threshold": 4,
+        "relevant": true,
+        "crosses_gust_threshold": false,
+        "low": {
+          "id": "ponta_grossa",
+          "name": "Ponta Grossa",
+          "value": 19.0
+        },
+        "high": {
+          "id": "londrina",
+          "name": "Londrina",
+          "value": 26.0
+        },
+        "available_locations": 18
+      }
+    },
+    "total": 16,
+    "classification": "reel",
+    "turno": "manha",
+    "character": "bira",
+    "hook_key": "4ebc9483b83fa89183de",
+    "dedupe_key": "c254a290df81983679de19e102ac2d5a76f8580a034c6f5cdeffe791fba03aa0",
+    "created_at": "2026-11-18T20:55:48.535707-03:00",
+    "expires_at": "2026-11-18T22:55:48-03:00",
     "vetoes": [],
     "status": "ready",
     "confidence": 78.4,
