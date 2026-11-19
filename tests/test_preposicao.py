@@ -66,16 +66,19 @@ def test_mesma_faixa_vira_uma_frase_so(snapshot, monkeypatch):
     falas = [b["fala"] for b in batidas]
     faixa = [f for f in falas if "das vinte e uma às vinte e três horas" in f]
     assert len(faixa) == 1, falas
-    assert faixa[0].startswith(em_locais(nomes, inicio=True) + ", a chuva é mais provável")
+    molhado = max(snapshot["forecast"]["today"]["locations"], key=lambda l: l.get("rain_mm") or 0)
+    assert faixa[0].startswith(em_local(molhado["name"], inicio=True) + ", a previsão é de")
+    assert all(n not in faixa[0] for n in nomes if n != molhado["name"])
 
 
-def test_faixas_diferentes_ficam_separadas(snapshot, monkeypatch):
+def test_so_fala_a_faixa_do_local_mais_chuvoso(snapshot, monkeypatch):
     batidas, nomes = _batidas(snapshot, monkeypatch, [
         {"start": "21:00", "end": "23:00"},
         {"start": "14:00", "end": "17:00"},
     ])
     falas = " ".join(b["fala"] for b in batidas)
-    assert falas.count("a chuva é mais provável") == 2
+    assert sum(b["dados"].get("sub") == "CHUVA PREVISTA" for b in batidas) == 1
+    assert "das vinte e uma às vinte e três horas" not in falas
     assert "das catorze às dezessete horas" in falas
 
 
