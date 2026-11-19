@@ -2132,10 +2132,12 @@
     "created_at": "2026-11-19T11:23:34.830860-03:00",
     "expires_at": "2026-11-19T13:23:34-03:00",
     "vetoes": [],
-    "status": "publishing",
+    "status": "published",
     "confidence": 78.4,
     "language": "forecast",
-    "claimed_at": "2026-11-19T11:28:24-03:00"
+    "claimed_at": "2026-11-19T11:28:24-03:00",
+    "published_at": "2026-11-19T11:29:05-03:00",
+    "media_id": "18143677960616706"
   },
   {
     "format": "antes_de_sair",
