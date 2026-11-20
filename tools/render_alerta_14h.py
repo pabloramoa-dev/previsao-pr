@@ -8,10 +8,22 @@ def main():
     rel=validar(json.loads(Path("output/alertas/consulta.json").read_text()))
     out=Path("output/alertas/ALERTA.mp4")
     out.parent.mkdir(parents=True,exist_ok=True)
-    local=rel["eventos"][0]["local"]
-    t=rel["temperaturas_reais"][local]
-    loc={"id":"alerta14h","name":local,"min_c":t["min"],"max_c":t["max"]}
-    bloco={"date":rel["data"],"locations":[loc]}
+    # Os seis pontos têm previsão horária REAL do ICON, preservando o
+    # quadro obrigatório do canal sem simular bairros ou temperaturas.
+    ancoras=[
+      ("curitiba","Curitiba","z_curitiba"),
+      ("paranagua","Paranaguá","z_litoral"),
+      ("ponta_grossa","Ponta Grossa","z_campos_gerais"),
+      ("londrina","Londrina","z_norte"),
+      ("maringa","Maringá","z_noroeste"),
+      ("cascavel","Cascavel","z_oeste"),
+    ]
+    locais=[]
+    for ident,nome,zona in ancoras:
+        t=rel["temperaturas_reais"][nome]
+        locais.append({"id":ident,"name":nome,"zone":zona,
+           "min_c":t["min"],"max_c":t["max"],"rain_mm":t["chuva_mm"]})
+    bloco={"date":rel["data"],"locations":locais}
     snap={"forecast":{"today":bloco,"tomorrow":bloco},"alerta_14h":rel}
     Path("output/alertas/snapshot.json").write_text(json.dumps(snap,ensure_ascii=False))
     original=Path("hyperframes/gerar_hf.py").read_text()
