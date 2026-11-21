@@ -1,1 +1,24 @@
-{"measurements": [], "status": "empty", "errors": [], "updated_at": null, "account": null}
+{
+  "measurements": [],
+  "status": "partial",
+  "errors": [
+    {
+      "media_id": "17913620490307258",
+      "error": "HTTPError"
+    },
+    {
+      "media_id": "18143677960616706",
+      "error": "HTTPError"
+    },
+    {
+      "media_id": "17959649697255693",
+      "error": "HTTPError"
+    },
+    {
+      "media_id": "18012376268783453",
+      "error": "HTTPError"
+    }
+  ],
+  "updated_at": "2026-11-21T20:54:37.615962+00:00",
+  "account": "previsaopr"
+}
