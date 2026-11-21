@@ -31,11 +31,10 @@ def montar(rel):
         abertura=(f"Atenção, {rel['local']}! Dois modelos indicam {tipo} "
                   f"{quando}, com início previsto por volta das {inicio:%Hh}. "
                   f"Destaque para {local}.")
-        unidade=e["unidade"]
         if e["tipo"]=="vento":
             detalhe=f"Os dois modelos apontam rajadas de pelo menos {e['valor']:g} quilômetros por hora."
         elif e["tipo"]=="chuva":
-            detalhe=f"Os dois modelos apontam acumulado de pelo menos {e['valor']:g} {unidade}."
+            detalhe=f"Os dois modelos apontam acumulado de pelo menos {e['valor']:g} {e['unidade']}."
         else:
             detalhe="ICON e GFS concordam com essa possibilidade, mas ela não é certeza de ocorrência."
         atrib="Fontes: ICON e GFS via Open-Meteo."
