@@ -41,6 +41,12 @@ def main():
                     "--out",str(out)],check=True,env=env)
     if not out.exists() or out.stat().st_size<100000:
         raise RuntimeError("MP4 de alerta do Paraná incompleto")
-    print("ALERTA PR:",out,out.stat().st_size)
+    capa = out.parent / "CAPA.jpg"
+    offset = out.parent / "capa_ms.txt"
+    if not capa.is_file() or capa.stat().st_size < 10000 or not offset.is_file():
+        raise RuntimeError("Capa do plantão não foi gerada: publicação bloqueada")
+    if not offset.read_text(encoding="utf-8").strip().isdecimal():
+        raise RuntimeError("Tempo da capa do plantão inválido")
+    print("ALERTA PR:",out,out.stat().st_size,"CAPA:",capa)
 
 if __name__=="__main__": main()
