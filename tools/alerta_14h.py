@@ -1,7 +1,7 @@
 """Alerta regional diário, 14h BRT. ICON+GFS, INMET CAP, Defesa Civil; falha fechada.
 Não confundir previsão de tempo severo com ocorrência confirmada.
 """
-import json, math, os, re, unicodedata, xml.etree.ElementTree as ET
+import json, math, os, re, time, unicodedata, xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -23,12 +23,23 @@ def normal(s):
                    if not unicodedata.combining(c)).upper().strip()
 
 def fetch(url, params=None):
-    r=requests.get(url,params=params,timeout=(10,35),
-                   headers={"User-Agent":"PrevisaoTempoBrasil/2.0 (avisos meteorologicos publicos)"})
-    r.raise_for_status()
-    if r.url.split("/")[2] != url.split("/")[2]:
-        raise RuntimeError("Redirecionamento para domínio inesperado")
-    return r
+    """Tentar novamente somente falhas transitórias; não aceitar dados parciais."""
+    for tentativa in range(3):
+        try:
+            r = requests.get(
+                url, params=params, timeout=(15, 40),
+                headers={"User-Agent": "PrevisaoTempoBrasil/2.0 (avisos meteorologicos publicos)"}
+            )
+        except (requests.Timeout, requests.ConnectionError):
+            if tentativa == 2:
+                raise
+            time.sleep(2 ** tentativa)
+            continue
+        r.raise_for_status()
+        if r.url.split("/")[2] != url.split("/")[2]:
+            raise RuntimeError("Redirecionamento para domínio inesperado")
+        return r
+    raise RuntimeError("Fonte meteorológica indisponível")
 
 def ler_cap(content, agora):
     root=ET.fromstring(content)
