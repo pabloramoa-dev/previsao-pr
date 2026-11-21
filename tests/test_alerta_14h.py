@@ -7,6 +7,44 @@ from tools.alerta_14h import CONFIG, sinais, validar, por_hora
 TZ=ZoneInfo("America/Sao_Paulo")
 
 class Alertas14h(unittest.TestCase):
+    def test_plantao_comeca_com_alerta_informativo_sem_zero(self):
+        from unittest.mock import patch
+        from tools.alerta_14h_roteiro import batidas
+        rel = {
+            "data": "2026-11-20", "emitido_em": "2026-11-20T14:00:00-03:00",
+            "local": "Paraná", "canal": "@previsaopr", "modo": "dois_modelos",
+            "eventos": [{"tipo": "chuva", "local": "Curitiba",
+                         "inicio": "2026-11-20T15:00:00-03:00",
+                         "fim": "2026-11-20T18:00:00-03:00",
+                         "valor": 30.0, "unidade": "mm em 3h"}],
+            "avisos_oficiais_correspondentes": [],
+        }
+        with patch("tools.alerta_14h_roteiro.validar"):
+            cenas = batidas(rel)
+        self.assertEqual([c["tipo"] for c in cenas[:2]], ["alerta", "alerta"])
+        self.assertNotIn("numero", cenas[0]["dados"])
+        self.assertEqual(cenas[0]["dados"]["titulo"], "CHUVA INTENSA")
+        self.assertEqual(cenas[0]["dados"]["detalhe"], "CURITIBA")
+        self.assertIn("20/11 15h", cenas[0]["dados"]["janela"])
+        self.assertEqual(cenas[1]["dados"]["detalhe"], "30 MM EM 3H")
+
+    def test_plantao_nao_inventa_valor_de_granizo(self):
+        from unittest.mock import patch
+        from tools.alerta_14h_roteiro import batidas
+        rel = {
+            "data": "2026-11-20", "emitido_em": "2026-11-20T14:00:00-03:00",
+            "local": "Paraná", "canal": "@previsaopr", "modo": "dois_modelos",
+            "eventos": [{"tipo": "granizo", "local": "Londrina",
+                         "inicio": "2026-11-20T16:00:00-03:00",
+                         "fim": "2026-11-20T17:00:00-03:00"}],
+            "avisos_oficiais_correspondentes": [],
+        }
+        with patch("tools.alerta_14h_roteiro.validar"):
+            cenas = batidas(rel)
+        self.assertEqual(cenas[0]["dados"]["titulo"], "RISCO DE GRANIZO")
+        self.assertEqual(cenas[1]["dados"]["detalhe"], "DOIS MODELOS INDICAM RISCO")
+        self.assertIn("ICON", cenas[0]["dados"]["selo"])
+
     def test_cobertura_regional(self):
         self.assertEqual(len(CONFIG["cidades"]),10)
         self.assertEqual(len({r[0] for r in CONFIG["cidades"]}),10)
