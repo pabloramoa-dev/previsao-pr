@@ -45,6 +45,19 @@ class Alertas14h(unittest.TestCase):
         self.assertEqual(cenas[1]["dados"]["detalhe"], "DOIS MODELOS INDICAM RISCO")
         self.assertIn("ICON", cenas[0]["dados"]["selo"])
 
+    def test_tentativa_adicional_quando_open_meteo_tem_timeout(self):
+        from unittest.mock import patch, Mock
+        import requests
+        from tools.alerta_14h import fetch
+        url = "https://api.open-meteo.com/v1/forecast"
+        resposta = Mock(url=url)
+        with patch("tools.alerta_14h.requests.get",
+                   side_effect=[requests.Timeout(), resposta]) as chamada, \
+             patch("tools.alerta_14h.time.sleep") as pausa:
+            self.assertIs(fetch(url), resposta)
+        self.assertEqual(chamada.call_count, 2)
+        pausa.assert_called_once()
+
     def test_cobertura_regional(self):
         self.assertEqual(len(CONFIG["cidades"]),10)
         self.assertEqual(len({r[0] for r in CONFIG["cidades"]}),10)
