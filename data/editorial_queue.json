@@ -2966,10 +2966,12 @@
     "created_at": "2026-11-21T10:29:23.085367-03:00",
     "expires_at": "2026-11-21T12:29:22-03:00",
     "vetoes": [],
-    "status": "publishing",
+    "status": "published",
     "confidence": 78.4,
     "language": "forecast",
-    "claimed_at": "2026-11-21T10:32:19-03:00"
+    "claimed_at": "2026-11-21T10:32:19-03:00",
+    "published_at": "2026-11-21T10:32:57-03:00",
+    "media_id": "17920006953524993"
   },
   {
     "format": "chove_onde",
