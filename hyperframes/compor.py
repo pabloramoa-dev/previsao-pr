@@ -378,14 +378,20 @@ def cena_quadro(p, cena, bat):
 def cena_alerta(p, cena, bat):
     b = bat[cena["batidas"][0]]
     d = b["dados"]
+    titulo = str(d.get("titulo") or "ALERTA DO TEMPO").upper()
+    # Escalar o texto para não cortar títulos nos Reels e na miniatura da grade.
+    tamanho = 116 if len(titulo) <= 16 else 98 if len(titulo) <= 21 else 82
+    detalhe = str(d.get("detalhe") or "").strip()
+    janela = str(d.get("janela") or "").strip()
+    selo = str(d.get("selo") or "PREVISÃO DE RISCO").strip()
     miolo = f'''<div class="al-fundo"></div>
- <div class="al-icone"><svg viewBox="-130 -120 260 230" width="240" height="212"><path d="M0 -105 L118 98 L-118 98 Z" fill="{YEL}" stroke="{PT}" stroke-width="12" stroke-linejoin="round"/>
+ <div class="al-icone"><svg viewBox="-130 -120 260 230" width="200" height="177" aria-hidden="true"><path d="M0 -105 L118 98 L-118 98 Z" fill="{YEL}" stroke="{PT}" stroke-width="12" stroke-linejoin="round"/>
   <rect x="-13" y="-48" width="26" height="92" rx="10" fill="{PT}"/><circle cx="0" cy="70" r="15" fill="{PT}"/></svg></div>
- <div class="al-titulo">{esc(d.get("titulo", "ATENÇÃO").upper())}</div>
- <div class="al-det"><span>{esc(d.get("detalhe", ""))}</span></div>
- <div class="al-carimbo" data-layout-allow-overlap="true"><span>ATENÇÃO</span></div>'''
+ <div class="al-titulo" style="font-size:{tamanho}px">{esc(titulo)}</div>
+ <div class="al-det"><span>{esc(detalhe)}</span></div>
+ <div class="al-janela">{esc(janela)}</div>
+ <div class="al-carimbo" data-layout-allow-overlap="true"><span>{esc(selo)}</span></div>'''
     return _scene(cena, p, RED, miolo)
-
 
 def _tam_frase(txt):
     n = len(txt)
@@ -550,12 +556,13 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
 .qd-dicas {{ font-family:"BarlowCB",sans-serif;font-size:26px;color:{YEL};margin-top:12px;text-align:center;line-height:1.25; }}
 /* ---------- alerta ---------- */
 .al-fundo {{ position: absolute; inset: 0; background-color: {RED}; background-image: repeating-linear-gradient(135deg, rgba(0,0,0,0.18) 0 44px, rgba(0,0,0,0) 44px 88px); }}
-.al-icone {{ position: absolute; top: 250px; left: 0; right: 0; display: flex; justify-content: center; }}
-.al-titulo {{ position: absolute; top: 470px; left: 50px; right: 50px; text-align: center; font-family: "BarlowC", sans-serif; font-size: 136px; line-height: 1; color: #ffffff; text-shadow: 0 10px 0 {PT}; }}
-.al-det {{ position: absolute; top: 625px; left: 40px; right: 40px; display: flex; justify-content: center; }}
-.al-det span {{ display: block; font-family: "BarlowCB", sans-serif; font-size: 56px; color: {PT}; background-color: #ffffff; border: 6px solid {PT}; border-radius: 16px; padding: 4px 26px 0; text-align: center; }}
-.al-carimbo {{ position: absolute; top: 770px; left: 0; right: 0; display: flex; justify-content: center; }}
-.al-carimbo span {{ display: block; font-family: "BarlowC", sans-serif; font-size: 70px; color: {PT}; background-color: {YEL}; padding: 4px 34px 0; border: 7px solid {PT}; border-radius: 14px; box-shadow: 0 10px 0 {PT}; }}
+.al-icone {{ position: absolute; top: 235px; left: 0; right: 0; display: flex; justify-content: center; }}
+.al-titulo {{ position: absolute; top: 415px; left: 55px; right: 55px; min-height: 145px; display: flex; justify-content: center; align-items: center; text-align: center; font-family: "BarlowC", sans-serif; line-height: 0.96; color: #ffffff; text-shadow: 0 8px 0 {PT}; }}
+.al-det {{ position: absolute; top: 585px; left: 38px; right: 38px; display: flex; justify-content: center; }}
+.al-det span {{ display: block; max-width: 100%; font-family: "BarlowCB", sans-serif; font-size: 52px; line-height: 1.12; color: {PT}; background-color: #ffffff; border: 6px solid {PT}; border-radius: 16px; padding: 12px 24px 8px; text-align: center; overflow-wrap: anywhere; }}
+.al-janela {{ position: absolute; top: 735px; left: 55px; right: 55px; font-family: "BarlowCB", sans-serif; font-size: 40px; line-height: 1.16; text-align: center; color: #ffffff; text-shadow: 0 4px 0 {PT}; }}
+.al-carimbo {{ position: absolute; top: 850px; left: 30px; right: 30px; display: flex; justify-content: center; }}
+.al-carimbo span {{ display: block; max-width: 100%; font-family: "BarlowC", sans-serif; font-size: 48px; color: {PT}; background-color: {YEL}; padding: 7px 22px 3px; border: 6px solid {PT}; border-radius: 14px; box-shadow: 0 8px 0 {PT}; text-align: center; }}
 /* ---------- frase ---------- */
 .fr-texto {{ position: absolute; top: 300px; left: 70px; right: 70px; height: 560px; display: flex; align-items: center; justify-content: center; text-align: center; font-family: "BarlowC", sans-serif; line-height: 1.05; color: #ffffff; text-shadow: 0 8px 0 {PT}; opacity: 0; }}
 /* ---------- cta ---------- */
@@ -748,6 +755,7 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: {NAVY
       tl.fromTo(q(id, ".al-titulo"), {{ scale: 2.2, opacity: 0 }}, {{ scale: 1, opacity: 1, duration: 0.35, ease: "power4.in" }}, c.ini + 0.12);
       shake(q(id, ".al-titulo"), c.ini + 0.47, 4);
       tl.fromTo(q(id, ".al-det"), {{ y: 40, opacity: 0 }}, {{ y: 0, opacity: 1, duration: 0.3, ease: "power3.out" }}, c.ini + 0.5);
+      tl.fromTo(q(id, ".al-janela"), {{ y: 20, opacity: 0 }}, {{ y: 0, opacity: 1, duration: 0.3, ease: "power2.out" }}, c.ini + 0.65);
       var tA = c.ini + Math.min(1.2, (c.fim - c.ini) * 0.4);
       tl.fromTo(q(id, ".al-carimbo span"), {{ scale: 3, rotation: 16, opacity: 0 }}, {{ scale: 1, rotation: -6, opacity: 1, duration: 0.28, ease: "power4.in" }}, tA);
       shake(q(id, ".al-carimbo"), tA + 0.28, 3);
