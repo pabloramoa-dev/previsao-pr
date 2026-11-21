@@ -58,7 +58,7 @@ permissions:
 env:
   ALVO: "18:00"        # gerado: alvo do turno
   PREPARO_MIN: "20"
-  PRAZO: "21:00"
+  PRAZO: "23:00"
   FUSO_UTC: "-3"       # gerado: igual a fuso_utc de config/estado.yaml
 
 # Mesmo grupo do publicar_manual.yml: nunca dois publicadores ao mesmo tempo.
@@ -145,6 +145,10 @@ jobs:
                   f'- media_id: `{ja[-1].get("media_id")}`\n\n'
                   'Esta tentativa de cron encerrou sem falar com a Meta.\n',
                   encoding='utf-8')
+          # Não marcar o workflow como sucesso quando NÃO houve publicação.
+          if atrasado and not ja:
+              print('::error::Disparo automático fora da janela sem Reel publicado. Verificar o agendador externo.')
+              raise SystemExit(1)
           PY
 
   reel:
