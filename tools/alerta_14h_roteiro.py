@@ -59,16 +59,54 @@ def rel_date(rel):
     from datetime import date
     return date.fromisoformat(rel["data"])
 
+TITULOS_ALERTA = {
+    "granizo": "RISCO DE GRANIZO",
+    "temporal": "RISCO DE TEMPORAL",
+    "chuva": "CHUVA INTENSA",
+    "vento": "VENTOS FORTES",
+}
+
+
+def dados_do_alerta(rel):
+    """Painéis informativos com tipo, local, horário e origem REAIS do relatório."""
+    e = rel["eventos"][0]
+    inicio = datetime.fromisoformat(e["inicio"]).astimezone(TZ)
+    fim = datetime.fromisoformat(e["fim"]).astimezone(TZ)
+    oficial = rel["modo"] == "aviso_oficial_inmet"
+    titulo = TITULOS_ALERTA[e["tipo"]]
+    janela = f"DE {inicio:%d/%m %Hh} ATÉ {fim:%d/%m %Hh}"
+    selo = "AVISO OFICIAL INMET" if oficial else "PREVISÃO • ICON + GFS"
+
+    # Não inventar milímetros, velocidade ou severidade nos eventos de código
+    # meteorológico (temporal/granizo) nem nos avisos oficiais do INMET.
+    if oficial:
+        detalhe = "AVISO OFICIAL VIGENTE"
+    elif e["tipo"] in ("chuva", "vento"):
+        valor = f"{e['valor']:g}"
+        detalhe = f"{valor} {e['unidade']}".upper()
+    else:
+        detalhe = "DOIS MODELOS INDICAM RISCO"
+    return (
+        {"titulo": titulo, "detalhe": e["local"].upper(),
+         "janela": janela, "selo": selo},
+        {"titulo": "PREVISÃO DE RISCO",
+         "detalhe": detalhe, "janela": janela, "selo": selo},
+    )
+
+
 def batidas(rel):
-    textos, _=montar(rel)
+    textos, _ = montar(rel)
+    painel_abertura, painel_detalhe = dados_do_alerta(rel)
+    # O antigo gancho enviava "!" para um contador de números, que virava "0!".
+    # Alertas começam já com aviso legível, também adequado à capa do Reel.
     return [
-      {"tipo":"gancho","fala":textos[0],"legenda":textos[0],
-       "dados":{"numero":"!","sub":"ALERTA DO TEMPO","titulo":"PLANTÃO"}},
-      {"tipo":"alerta","fala":textos[1],"legenda":textos[1],
-       "dados":{"titulo":"PREVISÃO DE RISCO","detalhe":rel["eventos"][0]["local"]}},
-      {"tipo":"frase","fala":textos[2],"legenda":textos[2],"dados":{}},
-      {"tipo":"cta","fala":textos[3],"legenda":textos[3],
-       "dados":{"chamada":"COMPARTILHE","sub":rel["canal"]}},
+      {"tipo": "alerta", "fala": textos[0], "legenda": textos[0],
+       "dados": painel_abertura},
+      {"tipo": "alerta", "fala": textos[1], "legenda": textos[1],
+       "dados": painel_detalhe},
+      {"tipo": "frase", "fala": textos[2], "legenda": textos[2], "dados": {}},
+      {"tipo": "cta", "fala": textos[3], "legenda": textos[3],
+       "dados": {"chamada": "COMPARTILHE", "sub": rel["canal"]}},
     ]
 
 def texto_para_arquivo(rel, path):
