@@ -107,7 +107,10 @@ def collect(root, expected, request=_request, now=None):
     user = user or 'me'
     if not token:
         return {'status':'credentials_missing','measurements':[]}
-    base = os.environ.get('IG_GRAPH_BASE','https://graph.instagram.com/v26.0').rstrip('/')
+    # Usar o mesmo host/versão do publicador oficial (Instagram Graph via Facebook Login).
+    # graph.instagram.com pode rejeitar o token da conta profissional com HTTP 401.
+    version = os.environ.get('META_GRAPH_VERSION') or 'v26.0'
+    base = (os.environ.get('IG_GRAPH_BASE') or f'https://graph.facebook.com/{version}').rstrip('/')
     account = request(base,user,token,{'fields':'id,username'})
     if (account.get('username') or '').lower().lstrip('@') != expected.lower().lstrip('@'):
         raise ValueError('Conta de métricas não corresponde a este canal')
