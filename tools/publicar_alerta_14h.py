@@ -38,6 +38,15 @@ def main():
     if args.video_file:
         f=Path(args.video_file)
         if not f.is_file() or f.stat().st_size<100000: raise ValueError("MP4 ausente ou pequeno")
+
+    # O frame 0 do HyperFrames é apenas cenário, sem painel. A capa da grade
+    # precisa ser escolhida depois de a animação mostrar o aviso por inteiro.
+    capa_ms = Path("output/alertas/capa_ms.txt")
+    if not capa_ms.is_file():
+        raise RuntimeError("Falta capa_ms.txt: não publicar Reel com capa vazia")
+    valor_capa = capa_ms.read_text(encoding="utf-8").strip()
+    if not valor_capa.isdecimal() or not (600 <= int(valor_capa) <= 180000):
+        raise ValueError("Offset da capa inválido")
     def obj(resp):
         try: d=resp.json()
         except ValueError: raise RuntimeError("Meta não retornou JSON")
@@ -64,7 +73,8 @@ def main():
         key=tipo+"_container"
         if not rec.get(key):
             pedido={"media_type":tipo}
-            if tipo=="REELS": pedido.update(caption=caption,share_to_feed="true")
+            if tipo=="REELS":
+                pedido.update(caption=caption,share_to_feed="true",thumb_offset=valor_capa)
             if args.video_url: pedido["video_url"]=args.video_url
             else: pedido["upload_type"]="resumable"
             container=str(post(uid+"/media",pedido)["id"])
