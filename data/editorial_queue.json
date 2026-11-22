@@ -3592,10 +3592,12 @@
     "created_at": "2026-11-21T21:39:25.713756-03:00",
     "expires_at": "2026-11-21T23:39:25-03:00",
     "vetoes": [],
-    "status": "publishing",
+    "status": "published",
     "confidence": 78.4,
     "language": "forecast",
-    "claimed_at": "2026-11-21T21:43:36-03:00"
+    "claimed_at": "2026-11-21T21:43:36-03:00",
+    "published_at": "2026-11-21T21:44:12-03:00",
+    "media_id": "17995391577070474"
   },
   {
     "format": "chove_onde",
