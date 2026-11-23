@@ -39,6 +39,8 @@ on:
     - cron: "35 20 * * *"   # fallback antes do alvo, independente do gatilho externo
     - cron: "25 21 * * *"   # gerado: reserva 1 (ALVO+25 em UTC)
     - cron: "25 22 * * *"   # gerado: reserva 2 (ALVO+85 em UTC)
+    - cron: "17 0 * * *"    # recuperação 21:17 BRT (22h UTC seria 19h BRT; 00:17 é dia UTC seguinte)
+    - cron: "17 1 * * *"    # recuperação 22:17 BRT, ainda dentro do prazo; trava impede duplicação
   # GATILHO PRINCIPAL: cron-job.org, 25 minutos antes do ALVO no fuso do canal,
   # chama POST /repos/:owner/:repo/dispatches {"event_type":"reel_noite"} com
   # um token fine-grained só deste repo (Contents: write). Ver docs/HORARIOS.md.
