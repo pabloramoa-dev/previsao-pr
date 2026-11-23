@@ -29,20 +29,36 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
+          SCHEDULE_CRON: ${{ github.event.schedule }}
         shell: bash
         run: |
           set -euo pipefail
           hora=$(TZ=America/Sao_Paulo date +%H)
           minuto=$(TZ=America/Sao_Paulo date +%M)
-          # Resgate agendado nunca deve publicar a previsao da manha depois do prazo.
-          # No disparo manual/push continua sendo possivel corrigir pontualmente.
-          if [[ "${{ github.event_name }}" == "schedule" ]] && (( 10#$hora > 11 || (10#$hora == 11 && 10#$minuto > 30) )); then
-            echo "Resgate agendado fora da janela segura: ${hora}:${minuto}."
-            exit 0
-          fi
-          # Hoje, o Reel da manhã usa a previsão atual. A partir de 17h,
-          # o resgate passa a pedir a previsão de amanhã, com a Bia.
-          if (( 10#$hora < 17 )); then
+          # O cron que disparou define o turno, nao a hora em que o GitHub entregou o job.
+          # Isso evita transformar um resgate da manha atrasado em publicacao da noite.
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            case "$SCHEDULE_CRON" in
+              '40 12 * * *'|'40 13 * * *')
+                workflow="reel_manha.yml"
+                if (( 10#$hora > 11 || (10#$hora == 11 && 10#$minuto > 30) )); then
+                  echo "Resgate da manha fora do prazo seguro: ${hora}:${minuto}."
+                  exit 0
+                fi
+                ;;
+              '10 21 * * *'|'10 22 * * *')
+                workflow="reel_noite.yml"
+                if (( 10#$hora < 17 || 10#$hora >= 23 )); then
+                  echo "Resgate da noite fora do prazo seguro: ${hora}:${minuto}."
+                  exit 0
+                fi
+                ;;
+              *)
+                echo "::error::Cron de resgate desconhecido: $SCHEDULE_CRON"
+                exit 1
+                ;;
+            esac
+          elif (( 10#$hora < 17 )); then
             workflow="reel_manha.yml"
           else
             workflow="reel_noite.yml"
