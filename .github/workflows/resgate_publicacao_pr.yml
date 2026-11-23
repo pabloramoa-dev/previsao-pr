@@ -9,6 +9,8 @@ on:
     paths:
       - '.github/workflows/resgate_publicacao_pr.yml'
   workflow_dispatch:
+  # Evento nativo do GitHub quando este repo muda de privado para publico.
+  public:
   # Resgate independente: se o agendador do Reel principal falhar, tenta recuperar.
   schedule:
     - cron: '40 12 * * *'  # 09:40 America/Sao_Paulo
@@ -35,6 +37,12 @@ jobs:
           set -euo pipefail
           hora=$(TZ=America/Sao_Paulo date +%H)
           minuto=$(TZ=America/Sao_Paulo date +%M)
+          # Ao tornar o repo publico, resgatar somente o Reel da noite ainda valido.
+          # Fora dessa janela, nao tentar publicar previsao vencida.
+          if [[ "${{ github.event_name }}" == "public" ]] && (( 10#$hora < 17 || 10#$hora >= 23 )); then
+            echo "Evento public fora da janela 17h-23h BRT: nenhuma publicacao automatica."
+            exit 0
+          fi
           # O cron que disparou define o turno, nao a hora em que o GitHub entregou o job.
           # Isso evita transformar um resgate da manha atrasado em publicacao da noite.
           if [[ "${{ github.event_name }}" == "schedule" ]]; then
