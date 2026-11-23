@@ -2,6 +2,7 @@ name: Resgate de publicação — Previsão PR
 
 # Uma alteração neste arquivo dispara um resgate pontual.
 # O fluxo normal continua exclusivamente nos Reels das 06h e 18h.
+# Recuperação de ambos os turnos: não substitui a publicação principal e respeita a trava anti-duplicação do Reel.
 on:
   push:
     branches: [main]
@@ -12,6 +13,8 @@ on:
   schedule:
     - cron: '40 12 * * *'  # 09:40 America/Sao_Paulo
     - cron: '40 13 * * *'  # 10:40 America/Sao_Paulo
+    - cron: '10 21 * * *'  # 18:10 America/Sao_Paulo — resgate da previsão de amanhã
+    - cron: '10 22 * * *'  # 19:10 America/Sao_Paulo — segunda tentativa da noite
 
 permissions:
   contents: read
