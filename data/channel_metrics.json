@@ -3,6 +3,26 @@
   "status": "partial",
   "errors": [
     {
+      "media_id": "18161556994575341",
+      "error": "HTTPError"
+    },
+    {
+      "media_id": "18088515737322311",
+      "error": "HTTPError"
+    },
+    {
+      "media_id": "17995391577070474",
+      "error": "HTTPError"
+    },
+    {
+      "media_id": "18116087243187525",
+      "error": "HTTPError"
+    },
+    {
+      "media_id": "17920006953524993",
+      "error": "HTTPError"
+    },
+    {
       "media_id": "17913620490307258",
       "error": "HTTPError"
     },
@@ -19,6 +39,6 @@
       "error": "HTTPError"
     }
   ],
-  "updated_at": "2026-11-21T20:54:37.615962+00:00",
+  "updated_at": "2026-11-24T02:13:04.506284+00:00",
   "account": "previsaopr"
 }
