@@ -5800,10 +5800,12 @@
     "created_at": "2026-11-26T08:47:12.041873-03:00",
     "expires_at": "2026-11-26T10:47:11-03:00",
     "vetoes": [],
-    "status": "publishing",
+    "status": "published",
     "confidence": 78.4,
     "language": "forecast",
-    "claimed_at": "2026-11-26T08:48:57-03:00"
+    "claimed_at": "2026-11-26T08:48:57-03:00",
+    "published_at": "2026-11-26T08:49:32-03:00",
+    "media_id": "18017103290988954"
   },
   {
     "format": "amanha_no_estado",
