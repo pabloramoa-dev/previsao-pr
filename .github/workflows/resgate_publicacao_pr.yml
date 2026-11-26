@@ -49,7 +49,7 @@ jobs:
             case "$SCHEDULE_CRON" in
               '40 12 * * *'|'40 13 * * *')
                 workflow="reel_manha.yml"
-                if (( 10#$hora > 11 || (10#$hora == 11 && 10#$minuto > 30) )); then
+                if (( 10#$hora < 6 || 10#$hora > 13 || (10#$hora == 13 && 10#$minuto > 30) )); then
                   echo "Resgate da manha fora do prazo seguro: ${hora}:${minuto}."
                   exit 0
                 fi
@@ -66,10 +66,13 @@ jobs:
                 exit 1
                 ;;
             esac
-          elif (( 10#$hora < 17 )); then
+          elif (( 10#$hora >= 6 && (10#$hora < 13 || (10#$hora == 13 && 10#$minuto <= 30)) )); then
             workflow="reel_manha.yml"
-          else
+          elif (( 10#$hora >= 17 && 10#$hora < 23 )); then
             workflow="reel_noite.yml"
+          else
+            echo "Resgate fora da janela segura: ${hora}:${minuto}."
+            exit 0
           fi
           echo "Resgate no horário de Brasília: ${hora}h. Workflow: ${workflow}"
           gh workflow run "$workflow" --repo "$REPO" --ref main -f publicar=true
