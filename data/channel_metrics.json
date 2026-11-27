@@ -3,6 +3,14 @@
   "status": "partial",
   "errors": [
     {
+      "media_id": "18031300274914517",
+      "error": "HTTPError"
+    },
+    {
+      "media_id": "18017103290988954",
+      "error": "HTTPError"
+    },
+    {
       "media_id": "18150077689573681",
       "error": "HTTPError"
     },
@@ -33,12 +41,8 @@
     {
       "media_id": "17920006953524993",
       "error": "HTTPError"
-    },
-    {
-      "media_id": "17913620490307258",
-      "error": "HTTPError"
     }
   ],
-  "updated_at": "2026-11-26T23:51:19.799074+00:00",
+  "updated_at": "2026-11-27T23:27:34.279621+00:00",
   "account": "previsaopr"
 }
