@@ -28,11 +28,29 @@ from zoneinfo import ZoneInfo
 FUSO = ZoneInfo("America/Sao_Paulo")
 FILA = Path("data/editorial_queue.json")
 WORKFLOW = {"manha": "reel_manha.yml", "noite": "reel_noite.yml"}
-# Janelas seguras (hora local). Manhã: Reel do dia; noite: previsão de amanhã.
-JANELA = {"manha": (hora(6, 0), hora(13, 30)), "noite": (hora(17, 50), hora(22, 45))}
-CRON_TURNO = {"40 12 * * *": "manha", "40 13 * * *": "manha",
-              "10 21 * * *": "noite", "10 22 * * *": "noite"}
+# Janelas seguras (hora local), por canal via JANELA_MANHA / JANELA_NOITE
+# ("HH:MM-HH:MM"). Padrão do PR (prazos 14:00 e 23:00).
+def _janela(env: str, padrao: str) -> tuple[hora, hora]:
+    ini, fim = os.environ.get(env, padrao).split("-")
+    return (hora(*map(int, ini.split(":"))), hora(*map(int, fim.split(":"))))
+
+
+JANELA = {"manha": _janela("JANELA_MANHA", "06:00-13:30"),
+          "noite": _janela("JANELA_NOITE", "17:50-22:45")}
 MAX_TENTATIVAS = 2
+
+
+def turno_do_cron(cron: str) -> str | None:
+    """Turno pelo horário UTC do cron: 09-17 UTC = manhã; 20-23/00-01 UTC = noite."""
+    try:
+        h = int(cron.split()[1])
+    except (IndexError, ValueError):
+        return None
+    if 9 <= h <= 17:
+        return "manha"
+    if h >= 20 or h <= 1:
+        return "noite"
+    return None
 
 
 def turno_do_item(item: dict) -> str:
@@ -56,7 +74,7 @@ def escolher_turno(agora: datetime, evento: str = "", cron: str = "") -> tuple[s
     real precisa estar dentro da janela (cron atrasado não vira outro turno)."""
     agora = agora.astimezone(FUSO)
     if evento == "schedule":
-        turno = CRON_TURNO.get(cron)
+        turno = turno_do_cron(cron)
         if turno is None:
             return None, f"cron de resgate desconhecido: {cron!r}"
         ini, fim = JANELA[turno]

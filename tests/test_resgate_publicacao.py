@@ -88,3 +88,19 @@ def test_limite_de_tentativas(monkeypatch):
     monkeypatch.setattr(R, "disparar_e_acompanhar", lambda *a: pytest.fail("não deveria disparar"))
     monkeypatch.setattr(R, "datetime", type("D", (), {"now": staticmethod(lambda tz=None: em(19, 15))}))
     assert R.main(["--repo", "x/y", "--evento", "workflow_dispatch"]) == 1
+
+
+def test_janela_configuravel_por_canal(monkeypatch):
+    import importlib
+    monkeypatch.setenv("JANELA_MANHA", "06:00-09:30")
+    monkeypatch.setenv("JANELA_NOITE", "17:50-20:30")
+    mod = importlib.reload(R)
+    try:
+        assert mod.escolher_turno(em(9, 20), "repository_dispatch")[0] == "manha"
+        assert mod.escolher_turno(em(9, 45), "repository_dispatch")[0] is None
+        assert mod.escolher_turno(em(20, 45), "repository_dispatch")[0] is None
+        assert mod.escolher_turno(em(10, 41), "schedule", "40 13 * * *")[0] is None  # depois do prazo
+    finally:
+        monkeypatch.delenv("JANELA_MANHA")
+        monkeypatch.delenv("JANELA_NOITE")
+        importlib.reload(R)
