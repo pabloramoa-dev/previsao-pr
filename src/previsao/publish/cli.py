@@ -30,6 +30,15 @@ def persist_queue(queue: str, message: str) -> None:
     subprocess.run(['git', '-c', 'user.name=github-actions[bot]', '-c',
                     'user.email=41898282+github-actions[bot]@users.noreply.github.com',
                     'commit', '-m', message, '--', queue], check=True)
+    # Outro commit na main (CI, radar, correção manual) entre o checkout e a
+    # reserva fazia o push ser rejeitado e derrubava a publicação (run
+    # 46090785830). Rebase e nova tentativa; conflito na própria fila continua
+    # falhando fechado — nunca publica sem a reserva gravada.
+    for tentativa in range(4):
+        if subprocess.run(['git', 'push', 'origin', 'HEAD:refs/heads/main']).returncode == 0:
+            return
+        time.sleep(2 + 3 * tentativa)
+        subprocess.run(['git', 'pull', '--rebase', 'origin', 'main'], check=True)
     subprocess.run(['git', 'push', 'origin', 'HEAD:refs/heads/main'], check=True)
 
 
